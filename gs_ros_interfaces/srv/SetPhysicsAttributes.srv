@@ -1,0 +1,7 @@
+string attribute
+string[] names
+string[] dof_names
+float64[] value
+---
+bool success
+string message

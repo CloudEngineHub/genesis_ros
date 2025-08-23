@@ -1,0 +1,23 @@
+string robot_name
+string attached_intity
+string target_link_name
+float64[] goal_state
+float64[] start_state
+int32 max_nodes
+float64 resolution
+float64 timeout
+int32 max_retries
+bool smooth_path
+int32 num_waypoints
+bool ignore_collision
+string planner
+string ee_link_name
+bool visualize
+bool execute
+geometry_msgs/Point target_pos
+float64 tolerance
+---
+bool success
+bool plan_found
+string message
+float64[] path

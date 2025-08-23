@@ -1,0 +1,1 @@
+gs_ros_interfaces/Contact[] contacts

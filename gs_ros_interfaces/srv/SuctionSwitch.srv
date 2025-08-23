@@ -1,0 +1,8 @@
+string entity_one
+string link_one
+string entity_two
+string link_two
+bool command
+---
+bool success
+string message

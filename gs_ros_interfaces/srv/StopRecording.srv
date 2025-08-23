@@ -1,0 +1,6 @@
+string name
+string file_name
+float64 fps
+---
+bool success
+string message

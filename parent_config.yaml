@@ -1,0 +1,529 @@
+scene:
+  n_envs: 1
+  sim:
+    dt: 0.05
+    substeps: 1
+    substeps_local: null
+    gravity: [0.0, 0.0, -9.81]
+    floor_height: 0.0
+    requires_grad: false
+
+  tool_config:
+    dt: 0.01
+    floor_height: 0.0
+
+  show_Viewer: true
+
+  profiling_options:
+    show_FPS: false
+    FPS_tracker_alpha: 0.9
+
+  viewer_config:
+    res: null
+    run_in_thread: false
+    refresh_rate: 60
+    max_FPS: 60
+    camera_pos: [3.5, 0.5, 2.5]
+    camera_lookat: [0.0, 0.0, 0.5]
+    camera_up: [0.0, 0.0, 1.0]
+    camera_fov: 40
+    enable_interaction: false
+
+  vis_config:
+    show_world_frame: false
+    world_frame_size: 1.0
+    show_link_frame: false
+    link_frame_size: 0.2
+    show_cameras: false
+    shadow: false
+    plane_reflection: false
+    env_separate_rigid: false
+    background_color: [0.04, 0.08, 0.12]
+    ambient_light: [0.1, 0.1, 0.1]
+    visualize_mpm_boundary: false
+    visualize_sph_boundary: false
+    visualize_pbd_boundary: false
+    segmentation_level: "link"
+    render_particle_as: "sphere"
+    particle_size_scale: 1.0
+    contact_force_scale: 0.01
+    n_support_neighbors: 12
+    n_rendered_envs: null
+    rendered_envs_idx: null
+    lights:
+      - type: directional
+        dir: [-1, -1, -1]
+        color: [1.0, 1.0, 1.0]
+        intensity: 5.0
+
+  rigid_config:
+    dt: null
+    gravity: null
+    enable_collision: true
+    enable_joint_limit: true
+    enable_self_collision: false
+    enable_adjacent_collision: false
+    disable_constraint: false
+    max_collision_pairs: 300
+    integrator: 1
+    IK_max_targets: 6
+    batch_links_info: false
+    batch_joints_info: false
+    batch_dofs_info: false
+    constraint_solver: 1
+    iterations: 50
+    tolerance: 1e-8
+    ls_iterations: 50
+    ls_tolerance: 0.01
+    sparse_solve: false
+    contact_resolve_time: null
+    # constraint_timeconst: 
+    use_contact_island: false
+    box_box_detection: false
+    use_hibernation: false
+    hibernation_thresh_vel: 0.001
+    hibernation_thresh_acc: 0.01
+    max_dynamic_constraints: 8
+    enable_multi_contact: true
+    enable_mujoco_compatibility: false
+    use_gjk_collision: false
+
+  avatar_config:
+    dt: null
+    enable_collision: false
+    enable_self_collision: false
+    enable_adjacent_collision: false
+    max_collision_pairs: 300
+    IK_max_targets: 6
+    max_dynamic_constraints: 8
+
+  mpm_config:
+    dt: null
+    gravity: null
+    particle_size: null
+    grid_density: 64
+    enable_CPIC: false
+    lower_bound: [-1.0, -1.0, 0.0]
+    upper_bound: [1.0, 1.0, 1.0]
+    use_sparse_grid: false
+    leaf_block_size: 8
+
+  sph_config:
+    dt: null
+    gravity: null
+    particle_size: 0.02
+    pressure_solver: "WCSPH"
+    lower_bound: [-100.0, -100.0, 0.0]
+    upper_bound: [100.0, 100.0, 100.0]
+    hash_grid_res: null
+    hash_grid_cell_size: null
+    max_divergence_error: 0.1
+    max_density_error_percent: 0.05
+    max_divergence_solver_iterations: 100
+    max_density_solver_iterations: 100
+
+  pbd_config:
+    dt: null
+    gravity: null
+    max_stretch_solver_iterations: 4
+    max_bending_solver_iterations: 1
+    max_volume_solver_iterations: 1
+    max_density_solver_iterations: 1
+    max_viscosity_solver_iterations: 1
+    particle_size: 0.01
+    hash_grid_res: null
+    hash_grid_cell_size: null
+    lower_bound: [-100.0, -100.0, 0.0]
+    upper_bound: [100.0, 100.0, 100.0]
+
+  fem_config:
+    dt: null
+    gravity: null
+    damping: 0.0
+    floor_height: 0
+    use_implicit_solver: false
+    n_newton_iterations: 1
+    n_pcg_iterations: 500
+    n_linesearch_iterations: 0
+    newton_dx_threshold: 1e-6
+    pcg_threshold: 1e-6
+    linesearch_c: 1e-4
+    linesearch_tau: 0.5
+    damping_alpha: 0.5
+    damping_beta: 0.0005
+
+  sf_config:
+    dt: null
+    res: 128
+    solver_iters: 500
+    decay: 0.99
+    T_low: 1.0
+    T_high: 0.0
+    inlet_pos: [1, 0.0, 0.0]
+    inlet_vel: [0, 0, 1]
+    inlet_quat: [1, 0, 0, 0]
+    inlet_s: 400.0
+
+  coupler_config:
+    type: "legacy"
+    legacy:
+      rigid_mpm: true
+      rigid_sph: true
+      rigid_pbd: true
+      rigid_fem: true
+      mpm_sph: true
+      mpm_pbd: true
+      fem_mpm: true
+      fem_sph: true
+    sap:
+      n_sap_iterations: 5
+      n_pcg_iterations: 100
+      n_linesearch_iterations: 10
+      sap_convergence_atol: 1e-6
+      sap_convergence_rtol: 1e-5
+      sap_taud: 0.1
+      sap_beta: 1.0
+      sap_sigma: 1e-3
+      pcg_threshold: 1e-6
+      linesearch_ftol: 1e-6
+      linesearch_max_step_size: 1.5
+      hydroelastic_stiffness: 1e8
+      point_contact_stiffness: 1e8
+      fem_floor_type: "tet"
+      fem_self_tet: true
+
+  # renderer_config:
+  #   device_index: 0
+  #   logging_level: "warning"
+  #   state_limit: 33554432
+  #   tracing_depth: 32
+  #   rr_depth: 0
+  #   rr_threshold: 0.95
+  #   env_surface: null
+  #   env_radius: 1000.0
+  #   env_pos: [0.0, 0.0, 0.0]
+  #   env_euler: [0.0, 0.0, 0.0]
+  #   env_quat: null
+  #   lights:
+  #     - pos: [0.0, 0.0, 10.0]
+  #       color: [1.0, 1.0, 1.0]
+  #       intensity: 10.0
+  #       radius: 4.0
+  #   normal_diff_clamp: 180
+
+world:
+  plane: true
+  # generated: 
+  #   pos: [0.0, 0.0, 0.0]
+  #   euler: [0.0, 0.0, 0.0]
+  #   quat: null
+  #   visualization: true
+  #   collision: true
+  #   requires_jac_and_IK: false
+  #   randomize: false
+  #   n_subterrains: [3, 3]
+  #   subterrain_size: [12.0, 12.0]
+  #   horizontal_scale: 0.25
+  #   vertical_scale: 0.005
+  #   subterrain_types:
+  #     - [flat_terrain  , random_uniform_terrain, stepping_stones_terrain]
+  #     - [pyramid_sloped_terrain   , discrete_obstacles_terrain, wave_terrain]
+  #     - [random_uniform_terrain   , pyramid_stairs_terrain, sloped_terrain]
+  #   height_field: null
+
+objects:
+  object_one:
+    name: object_one
+    morph:
+      path: "/home/vybhav/Desktop/newest_genesis/box.urdf"
+      pos: [5.0, 0.0, 0.0]
+      euler: [0.0, 0.0, 0.0]
+      fixed: true
+
+robots:
+  robot_one:
+    visualize_contact: false
+    namespace: "robot"
+    control_topic: control
+    joint_state_target_topic: joint_commands
+    joint_state_target_topic_frequency: 50
+    joint_properties: # the joints should be in alphabetical order
+      left_wheel_steering_joint:
+        kp: 30
+        kv: 30
+        command: position
+      rear_left_wheel_joint:
+        kp: 50
+        kv: 50
+        command: velocity
+      rear_right_wheel_joint:
+        kp: 50
+        kv: 50
+        command: velocity
+      right_wheel_steering_joint:
+        kp: 30
+        kv: 30
+        command: position
+
+
+
+    morph:
+      path: "/home/vybhav/Desktop/newest_genesis/ackerman.urdf"
+      pos: [0.0, 0.0, 0.0]
+      euler: [0.0, 0.0, 0.0]
+      quat: null
+      visualization: true
+      collision: true
+      requires_jac_and_IK: true
+      scale: 1.0
+      convexify: null
+      recompute_inertia: false
+      fixed: false
+      prioritize_urdf_material: false
+      merge_fixed_links: false
+      links_to_keep: [lidar_link,camera_link,laser_link]
+
+    material:
+      type: rigid
+      rho: 200.0
+      friction: null
+      needs_coup: true
+      coup_friction: 0.1
+      coup_softness: 0.002
+      coup_restitution: 0.0
+      sdf_cell_size: 0.005
+      sdf_min_res: 32
+      sdf_max_res: 128
+      gravity_compensation: 0
+
+    surface:
+      color: null
+      opacity: null
+      roughness: null
+      metallic: null
+      emissive: null
+      ior: null
+      opacity_texture: null
+      roughness_texture: null
+      metallic_texture: null
+      normal_texture: null
+      emissive_texture: null
+      default_roughness: 1.0
+      vis_mode: null
+      smooth: true
+      double_sided: null
+      beam_angle: 180
+      normal_diff_clamp: 180
+      recon_backend: splashsurf
+      generate_foam: false
+      foam_options: null
+      diffuse_texture: null
+      specular_trans: 0.0
+      diffuse_trans: 0.0
+    
+    sensors:
+  # ----------------------------
+  # CAMERA (RGB, Depth, etc.)
+  # ----------------------------
+    # - name: front_cam
+    #   sensor_type: cam
+    #   link: lidar_link
+    #   Transform: [[  0.00,   0.00,  -1.00,   0.00],
+    #               [ -1.00,   0.00,   0.00,   0.00],
+    #               [  0.00,   1.00,   0.00,   0.00],
+    #               [  0.00,   0.00,   0.00,   1.00]]
+    #   topics: [rgb,depth,segmentation,normal]
+    #   frequency: 50
+    #   QOS_history: keep_last
+    #   QOS_depth: 10
+    #   QOS_reliability: reliable
+    #   QOS_durability: volatile
+    #   frame_id: lidar_link
+    #   # camera_type one of : ["rgb", "depth", "segmentation", "normal"]
+    #   camera_types: [rgb,depth,segmentation,normal]
+    #   model: pinhole
+    #   res: [640, 480]
+    #   vfov: 30
+    #   aperture: 2.8
+    #   focus_dist: null
+    #   GUI: false
+    #   spp: 256
+    #   denoise: true
+    #   near: 0.05
+    #   far: 10.0
+    #   noise_mean: 0.0
+    #   noise_std: 0.01
+
+    # # ----------------------------
+    # # RGBD CAMERA
+    # # ----------------------------
+    # - name: rgbd_front
+    #   sensor_type: rgbd
+    #   attached: false
+    #   entity: robot_one
+    #   link: camera_link
+    #   frame_id: camera_link
+    #   frequency: 15
+    #   tilt_angle: 0.0
+    #   Transform: [[  0.00,   0.00,  -1.00,   0.00],
+    #               [ -1.00,   0.00,   0.00,   0.00],
+    #               [  0.00,   1.00,   0.00,   0.00],
+    #               [  0.00,   0.00,   0.00,   1.00]]
+
+    #   rgb:
+    #     name: rgb_cam
+    #     topic: rgb_cam
+    #     QOS_history: keep_last
+    #     QOS_depth: 10
+    #     QOS_reliability: reliable
+    #     QOS_durability: volatile
+    #     frequency: 15
+    #     res: [640, 480]
+    #     model: pinhole
+    #     vfov: 30
+    #     aperture: 2.8
+    #     focus_dist: null
+    #     GUI: false
+    #     spp: 256
+    #     denoise: true
+    #     near: 0.05
+    #     far: 10.0
+    #     noise_mean: 0.0
+    #     noise_std: 0.01
+
+    #   depth:
+    #     name: depth_cam
+    #     topic: points_dep
+    #     QOS_history: keep_last
+    #     QOS_depth: 10
+    #     QOS_reliability: reliable
+    #     QOS_durability: volatile
+    #     frequency: 15
+    #     res: [640, 480]
+    #     model: pinhole
+    #     vfov: 30
+    #     aperture: 2.8
+    #     focus_dist: null
+    #     GUI: false
+    #     spp: 256
+    #     denoise: true
+    #     near: 0.05
+    #     far: 10.0
+    #     noise_mean: 0.0
+    #     noise_std: 0.02
+
+    # # ----------------------------
+    # # SECTIONAL LIDAR
+    # # ----------------------------
+    # - name: front_sec_lidar
+    #   sensor_type: sectional_lidar
+    #   link: lidar_link
+    #   topic: points_sec
+    #   QOS_history: keep_last
+    #   QOS_depth: 10
+    #   QOS_reliability: reliable
+    #   QOS_durability: volatile
+    #   frequency: 10
+    #   frame_id: lidar_link
+    #   tilt_angle: 0.0
+    #   model: pinhole
+    #   res: [640, 480]
+    #   vfov: 60
+    #   aperture: 2.8
+    #   focus_dist: null
+    #   GUI: false
+    #   spp: 256
+    #   denoise: true
+    #   near: 0.05
+    #   far: 10.0
+    #   noise_mean: 0.0
+    #   noise_std: 0.01
+    #   Transform: [[  0.00,   0.00,  -1.00,   0.00],
+    #               [ -1.00,   0.00,   0.00,   0.00],
+    #               [  0.00,   1.00,   0.00,   0.00],
+    #               [  0.00,   0.00,   0.00,   1.00]]
+
+    # # ----------------------------
+    # # 3D LIDAR
+    # # ----------------------------
+    # - name: top_lidar
+    #   sensor_type: 3d_lidar
+    #   attached: false
+    #   entity: robot_one
+    #   link: lidar_link
+    #   topic: top_lidar_points
+    #   QOS_history: keep_last
+    #   QOS_depth: 10
+    #   QOS_reliability: reliable
+    #   QOS_durability: volatile
+    #   frequency: 25
+    #   frame_id: lidar_link
+    #   tilt_angle: 0.0
+    #   horizontal_min_angle: -3.14  # radians
+    #   horizontal_max_angle: 3.14   # radians
+    #   h_samples: 1200
+    #   v_samples: 16
+    #   near: 0.05
+    #   far: 15.0
+    #   noise_mean: 0.0
+    #   noise_std: 0.01
+    #   Transform: [[  0.00,   0.00,  -1.00,   0.00],
+    #               [ -1.00,   0.00,   0.00,   0.00],
+    #               [  0.00,   1.00,   0.00,   0.00],
+    #               [  0.00,   0.00,   0.00,   1.00]]
+
+    # # # ----------------------------
+    # # # LASER SCAN
+    # # # ----------------------------
+    # - name: laser_front
+    #   sensor_type: laser_scan
+    #   link: laser_link
+    #   topic: scan
+    #   QOS_history: keep_last
+    #   QOS_depth: 10
+    #   QOS_reliability: reliable
+    #   QOS_durability: volatile
+    #   frequency: 25
+    #   frame_id: laser_link
+    #   horizontal_min_angle: -3.14
+    #   horizontal_max_angle: 3.14
+    #   h_samples: 2400
+    #   noise_mean: 0.0
+    #   noise_std: 0.005
+    #   range_min: 0.05
+    #   range_max: 10.0
+    #   Transform: [[  0.00,   0.00,  -1.00,   0.00],
+    #               [ -1.00,   0.00,   0.00,   0.00],
+    #               [  0.00,   1.00,   0.00,   0.00],
+    #               [  0.00,   0.00,   0.00,   1.00]]
+
+    # # ----------------------------
+    # # IMU
+    # # ----------------------------
+    - name: base_imu
+      sensor_type: imu
+      topic: imu
+      frequency: 50
+      frame_id: imu_link
+      QOS_history: keep_last
+      QOS_depth: 10
+      QOS_reliability: reliable
+      QOS_durability: volatile
+
+    # # ----------------------------
+    # # CONTACT SENSOR
+    # # ----------------------------
+    # - name: gripper_contacts
+    #   sensor_type: contact
+    #   topic: /robot_one/contacts
+    #   QOS_history: keep_last
+    #   QOS_depth: 10
+    #   QOS_reliability: reliable
+    #   QOS_durability: volatile
+    #   frequency: 20
+    #   entity: robot_one
+    #   link: gripper_link
+    #   target_object_name: object1
+    #   exclude_self_contact: true
+
+  

@@ -1,0 +1,24 @@
+string robot_name
+string target_link_name
+geometry_msgs/Point position
+geometry_msgs/Quaternion orientation
+float64[] init_robot_pos
+bool request_joint_limit
+int32 max_samples
+int32 max_solver_iterartions
+float64 damping
+float64 pos_tol
+float64 rot_tol
+bool[] pos_mask
+bool[] rot_mask
+float64 max_step_size
+int32[] dofs_idx_local
+bool visualize
+bool execute
+---
+bool success
+bool solution_found
+float64[] joint_angles
+float64 target_pos_error
+float64 target_quat_error
+string message

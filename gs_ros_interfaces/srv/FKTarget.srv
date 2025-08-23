@@ -1,0 +1,9 @@
+string robot_name
+float64[] qpos
+string[] dof_names
+string[] link_names
+---
+bool success
+string message
+geometry_msgs/Point[] link_pos
+geometry_msgs/Quaternion[] link_quat
