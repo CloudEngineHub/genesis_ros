@@ -1,5 +1,5 @@
 # Genesis ROS Bridge (gs_ros) 🤖
-
+![alt text](genesis_teaser.png)
 `gs_ros` is a ROS 2 package designed to bridge the gap between the powerful [Genesis](https://github.com/Genesis-Embodied-AI/Genesis.git) simulator and the ROS 2 ecosystem. Genesis is a next-generation physics platform for Robotics and Embodied AI, offering:
 
 1.  A universal physics engine built from the ground up for a wide range of materials.
@@ -7,7 +7,8 @@
 3.  A powerful and fast photo-realistic rendering system.
 4.  A generative data engine that can create multi-modal data from natural language prompts.
 
-This project provides the essential tools to kickstart your robotics development and simulation within ROS 2 using Genesis.
+This project provides the essential tools to kickstart your robotics development and simulation within ROS 2 using Genesis. Using this package is very simple, the main code is 5 lines long 
+![alt text](carbon.png)
 
 ---
 
