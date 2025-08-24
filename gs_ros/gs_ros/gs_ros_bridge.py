@@ -13,7 +13,7 @@ import time
 
 class GsRosBridge:
     def __init__(self,file_path,ros_node,
-                 ros_clock_node=None,ros_service_node=None):
+                 ros_clock_node=None,ros_control_node=None,ros_service_node=None):
 
         self.ros_node=ros_node
         if ros_clock_node is not None:
@@ -23,7 +23,11 @@ class GsRosBridge:
         if ros_service_node is not None:
             self.ros_service_node=ros_service_node
         else:
-            self.ros_service_node=ros_node   
+            self.ros_service_node=ros_node
+        if ros_control_node is not None:
+            self.ros_control_node=ros_control_node
+        else:
+            self.ros_control_node=ros_node   
         with open(file_path, 'r') as file:
             self.parent_config=yaml.safe_load(file)
         self.scene= make_gs_scene(scene_config=self.parent_config["scene"])
