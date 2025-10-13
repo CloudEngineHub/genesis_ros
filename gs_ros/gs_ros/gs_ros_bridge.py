@@ -7,68 +7,80 @@ from .gs_ros_utils import make_gs_scene
 
 from rclpy.node import Node
 import rclpy
-
 import yaml
-import time
 
 class GsRosBridge:
-    def __init__(self,file_path,ros_node,
+    def __init__(self,ros_node,file_path=None,
                  ros_clock_node=None,ros_control_node=None,ros_service_node=None):
 
         self.ros_node=ros_node
+        self.all_nodes_to_spin=[]
         if ros_clock_node is not None:
             self.ros_clock_node=ros_clock_node
+            self.all_nodes_to_spin.append(self.ros_clock_node)
         else:
             self.ros_clock_node=ros_node
+
         if ros_service_node is not None:
             self.ros_service_node=ros_service_node
+            self.all_nodes_to_spin.append(self.ros_service_node)
         else:
             self.ros_service_node=ros_node
+            
         if ros_control_node is not None:
             self.ros_control_node=ros_control_node
+            self.all_nodes_to_spin.append(self.ros_control_node)
         else:
-            self.ros_control_node=ros_node   
-        with open(file_path, 'r') as file:
-            self.parent_config=yaml.safe_load(file)
-        self.scene= make_gs_scene(scene_config=self.parent_config["scene"])
-        self.sim=Gs_Ros_Sim(self.scene,self.parent_config["scene"])
-        self.sim.add_world(self.parent_config["world"])
-        
-        self.robots=[]
-        self.objects=[]
-        self.all_sensors={}
-        self.cameras=[]
-        self.all_sensors={}
-        self.all_cameras={}
-        
-        for _, object_config in self.parent_config.get("objects", {}).items():
-            object_name=object_config["name"]
-            object=self.sim.spawn_from_config(entity_config=object_config)
-            self.objects.append((object_name,object.idx,object))
+            self.ros_control_node=ros_node
             
-        for robot_name, robot_config in self.parent_config.get("robots", {}).items():
-            namespace=robot_config.get("namespace","")
-            robot=self.sim.spawn_from_config(entity_config=robot_config)
-            self.robots.append((robot_name,robot.idx,robot))
-            setattr(self,f"{robot_name}_robot_control",Gs_Ros_Robot_Control(self.scene,self.ros_node,robot_config,robot))
-            sensor_factory=Gs_Ros_Sensors(self.scene,self.sim,self.ros_node,namespace,robot,self.robots,self.objects)
-            setattr(self,f"{robot_name}_sensor_factory",sensor_factory)
-            sensors=[]
-            for sensor_config in robot_config.get("sensors",{}):
-                sensor_type=sensor_factory.add_sensor(sensor_config)
-                sensors.append([sensor_type,sensor_config["name"]])
-            self.all_cameras[robot_name]=sensor_factory.cameras
-            self.all_sensors[robot_name]=sensors
-        
-        self.services=Gs_Ros_Services(self.scene,self.ros_service_node,self.robots,self.objects,self.all_cameras)
-    
+        if file_path is not None:
+            with open(file_path, 'r') as file:
+                self.parent_config=yaml.safe_load(file)
+            self.scene= make_gs_scene(scene_config=self.parent_config["scene"])
+            self.sim=GsRosSim(self.scene,self.parent_config["scene"])
+            self.sim.add_world(self.parent_config["world"])
+            
+            self.robots=[]
+            self.objects=[]
+            self.all_sensors={}
+
+            if self.parent_config.get("objects") is not None:
+                for _, object_config in self.parent_config.get("objects", {}).items():
+                    object_name=object_config["name"]
+                    gs.logger.info(f"Adding object {object_name} to scene")
+                    object=self.sim.spawn_from_config(entity_config=object_config)
+                    self.objects.append((object_name,object.idx,object))
+                    
+            if self.parent_config.get("robots") is not None:
+                for robot_name, robot_config in self.parent_config.get("robots", {}).items():
+                    namespace=robot_config.get("namespace","")
+                    gs.logger.info(f"Adding robot {namespace} to scene")
+                    robot=self.sim.spawn_from_config(entity_config=robot_config)
+                    self.robots.append((robot_name,robot.idx,robot))
+                    setattr(self,f"{robot_name}_robot_control",GsRosRobotControl(self.scene,self.ros_control_node,robot_config,robot))
+                    sensor_factory=GsRosSensors(self.scene,self.sim,namespace,robot)
+                    setattr(self,f"{robot_name}_sensor_factory",sensor_factory)
+                    sensors={}
+                    if robot_config.get("sensors") is not None:
+                        for sensor_config in robot_config.get("sensors",{}):
+                            sensors[sensor_config["name"]]=sensor_factory.add_sensor(sensor_config)
+                    self.all_nodes_to_spin.extend(sensor_factory.all_ros_nodes)
+                    self.all_sensors[robot_name]=sensors
+            
+            self.services=GsRosServices(self.scene,self.ros_service_node,self.robots,self.objects,self.all_sensors)
+        else:
+            self.scene=None
+            gs.logger.warn(f"No config file path provided, please provide the path or add the scene, robots, etc as necessary")
+            
     def build(self):
         self.sim.build_scene(self.parent_config["scene"])
         self.sim.start_clock(self.ros_clock_node)
         
     def step(self):
+        self.scene.step()
         if rclpy.ok():
-            rclpy.spin_once(self.ros_node)
-            self.scene.step()
+            for ros_node in self.all_nodes_to_spin:
+                rclpy.spin_once(ros_node,timeout_sec=0)
+            
             
                     

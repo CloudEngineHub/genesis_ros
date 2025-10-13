@@ -1,16 +1,56 @@
 from sensor_msgs.msg import PointCloud2,PointField,LaserScan
 import numpy as np
 from cv_bridge import CvBridge
-from .gs_ros_utils import rotate_around_line_local_x
-import math
 
 def make_cv2_bridge():
         return CvBridge()
 
-def add_noise(arr, mean=0.0, std=1.0):
+def add_sensor_noise(arr, mean=0.0, std=1.0):
     noise = np.random.normal(loc=mean, scale=std, size=arr.shape)
     noisy = arr.astype(float) + noise
     return noisy.astype(arr.dtype)  # round/truncate implicitly
+    
+def raycaster_to_pcd_msg(raycaster, stamp, frame_id,add_noise=False,noise_mean=0.0,noise_std=0.0):
+    if add_noise:
+        return points_to_pcd_msg(add_sensor_noise(raycaster.read()[0].detach().cpu().numpy(),noise_mean,noise_std),
+                                stamp=stamp,frame_id=frame_id)
+    else:
+        return points_to_pcd_msg(raycaster.read()[0].detach().cpu().numpy(),
+                        stamp=stamp,frame_id=frame_id)
+
+def grid_raycaster_to_pcd_msg(raycaster, stamp, frame_id,add_noise=False,noise_mean=0.0,noise_std=0.0):
+    if add_noise:
+        return points_to_pcd_msg(add_sensor_noise(raycaster.read()[0].detach().cpu().numpy(),noise_mean,noise_std),
+                                stamp=stamp,frame_id=frame_id)
+    else:
+        return points_to_pcd_msg(raycaster.read()[0].detach().cpu().numpy(),
+                        stamp=stamp,frame_id=frame_id)
+        
+def raycaster_to_laser_scan_msg(raycaster, stamp, frame_id,
+                               angle_min,angle_max,
+                               resolution,near,far,
+                               add_noise=False,
+                               noise_mean=0.0,noise_std=0.0,):
+    if add_noise:
+        data=add_sensor_noise(raycaster.read()[1][0].detach().cpu().numpy(),noise_mean,noise_std)
+    else:
+        data=raycaster.read()[1][0].detach().cpu().numpy()
+
+    msg=LaserScan()
+    msg.angle_min=np.deg2rad(angle_min)
+    msg.angle_max=np.deg2rad(angle_max)
+    msg.range_min=near
+    msg.range_max=far
+    msg.angle_increment=(abs(msg.angle_max)+abs(msg.angle_min))/resolution
+
+    ranges=data.squeeze(1).tolist()
+    msg.ranges=ranges
+    if stamp is not None:
+        msg.header.stamp = stamp
+    if frame_id is not None:
+        msg.header.frame_id = frame_id
+
+    return msg
     
 def points_to_pcd_msg(input_pc,stamp,frame_id):
         type_mappings = [
@@ -57,137 +97,3 @@ def points_to_pcd_msg(input_pc,stamp,frame_id):
 
         return msg
         
-def lidar_cams_to_pcd_msg(cameras,link,link_offset_T,
-                            T_MAT_X,T_MAT_Z,T_MAT_TILT, 
-                            stamp, frame_id,hfov,near,far,
-                            noise_mean=0.0,noise_std=0.0,):
-        """
-        Renders point clouds from multiple cameras, merges them, applies transforms,
-        and returns a PointCloud2 message.
-        """
-        agg_pc = None
-        camera_count = len(cameras)
-        if camera_count >0:
-            step=math.ceil(hfov)/(camera_count)
-        for j, cam in enumerate(cameras):
-            assert cam.is_built, f"CAMERA with id{cam.id} not Built"
-            if cam._attached_link is None:
-                cam.attach(link,link_offset_T)
-            cam.move_to_attach()
-            angle_rad = np.deg2rad(j * step)
-            direction = np.array([np.cos(angle_rad), np.sin(angle_rad), 0.0])
-            lookat = cam.pos + direction
-            cam.set_pose(lookat=lookat)
-            pc, _ = cam.render_pointcloud(world_frame=False)  # (H, W, 3)
-            pc_mask = (
-                (pc[:, :, 0] < near) |
-                (pc[:, :, 0] > far-0.1) |
-                (pc[:, :, 1] < near) |
-                (pc[:, :, 1] > far-0.1) |
-                (pc[:, :, 2] < near) |
-                (pc[:, :, 2] > far-0.1)  
-            )
-            pc=pc[~pc_mask]
-            
-            pc = pc @ T_MAT_X.T @ T_MAT_Z[j].T @ T_MAT_TILT
-
-            if agg_pc is None:
-                agg_pc = pc
-            else:
-                agg_pc = np.concatenate([agg_pc, pc],axis=0)
-        
-        agg_pc=add_noise(agg_pc,noise_mean,noise_std)
-        return points_to_pcd_msg(agg_pc,stamp=stamp,frame_id=frame_id)
-            
-
-def sectional_lidar_cam_to_pcd_msg(cameras,T_MAT_X,T_MAT_Z,T_MAT_TILT, 
-                                        stamp, frame_id,
-                                        near, far, tilt_angle=0,                                 
-                                        noise_mean=0.0,noise_std=0.0):
-    cam=cameras[0]
-    cam.move_to_attach()
-    lookat=rotate_around_line_local_x(cam.pos, cam.lookat,-tilt_angle)
-    cam.set_pose(lookat=lookat)
-        
-    pc, _ = cam.render_pointcloud(world_frame=False)  # (H, W, 3)
-
-    pc_mask = (
-        (pc[:, :, 1] < near) |
-        (pc[:, :, 1] > far) |
-        (pc[:, :, 0] < near) |
-        (pc[:, :, 0] > far) |
-        (pc[:, :, 2] < near) |
-        (pc[:, :, 2] > far)  
-    )
-    # pc[pc_mask] = np.array([0, 0, 0])
-    pc=pc[~pc_mask]
-    
-    #modify
-    pc = pc @ T_MAT_X.T @ T_MAT_Z[0].T @T_MAT_TILT
-    
-    pc=add_noise(pc,noise_mean,noise_std)
-
-    return points_to_pcd_msg(pc,stamp=stamp,frame_id=frame_id)
-
-def lidar_cams_to_laser_scan_msg(cameras,link,link_offset_T,
-                                 T_MAT_X,T_MAT_Z,
-                                stamp, frame_id,hfov,
-                                near,far,
-                                noise_mean=0.0,noise_std=0.0):
-        """
-        Renders point clouds from multiple cameras, merges them, applies transforms,
-        and returns a PointCloud2 message.
-        """
-        agg_pc = None
-        camera_count = len(cameras)
-        if camera_count >0:
-            step=hfov/camera_count
-        step=hfov/(camera_count)
-        for j, cam in enumerate(cameras):
-            assert cam.is_built, f"CAMERA with id{cam.id} not Built"
-            if cam._attached_link is None:
-                    cam.attach(link,link_offset_T)
-            cam.move_to_attach()
-            angle_rad = np.deg2rad(j * step)
-            direction = np.array([np.cos(angle_rad), np.sin(angle_rad), 0.0])
-            lookat = cam.pos + direction
-            cam.set_pose(lookat=lookat)
-
-            pc, _ = cam.render_pointcloud(world_frame=False)  # (H, W, 3)
-            
-            pc_mask = (
-                (pc[:, :, 0] < near) |
-                (pc[:, :, 0] > far-0.1) |
-                (pc[:, :, 1] < near) |
-                (pc[:, :, 1] > far-0.1) |
-                (pc[:, :, 2] < near) |
-                (pc[:, :, 2] > far-0.1)  
-            )
-            # pc=pc[~pc_mask]
-            pc[~pc_mask]=np.array([0,0,0])
-            
-            pc = pc @ T_MAT_X.T @ T_MAT_Z[j].T
-
-            if agg_pc is None:
-                agg_pc = pc
-            else:
-                agg_pc = np.concatenate([agg_pc, pc],axis=1)
-            
-        # Create PointCloud2 message
-        agg_pc=add_noise(agg_pc,noise_mean,noise_std)
-        distance= np.hypot(agg_pc[0][:,0],agg_pc[0][:,1]) 
-        # distance
-        msg=LaserScan()
-        msg.angle_min=-np.deg2rad(hfov/2)
-        msg.angle_max=np.deg2rad(hfov/2)
-        msg.range_min=near
-        msg.range_max=far
-        msg.angle_increment=hfov/agg_pc.shape[1]
-
-        msg.ranges=distance.tolist()
-        if stamp is not None:
-            msg.header.stamp = stamp
-        if frame_id is not None:
-            msg.header.frame_id = frame_id
-
-        return msg

@@ -6,7 +6,7 @@ from .gs_ros_utils import (
     make_material,
     make_surface)
 
-class Gs_Ros_Sim:
+class GsRosSim:
     def __init__(self,scene,scene_config):
         self.scene=scene
         self.scene_config=scene_config

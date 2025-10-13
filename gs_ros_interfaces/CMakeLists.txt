@@ -19,8 +19,9 @@ find_package(rosidl_default_generators REQUIRED)
 # find_package(<dependency> REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Contact.msg"
-  "msg/Contacts.msg"
+  "msg/ContactForce.msg"
   "srv/SetEntityPose.srv"
+  "srv/GetEntityPose.srv"
   "srv/PathPlanTarget.srv"
   "srv/IKTarget.srv"
   "srv/FKTarget.srv"
@@ -30,9 +31,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/PauseRecording.srv"
   "srv/StopRecording.srv"
   "srv/SetPhysicsAttributes.srv"
-  # "srv/VisualiseJointStates.srv"
-  # "srv/AddThreeInts.srv"
-  DEPENDENCIES geometry_msgs std_msgs# Add packages that above messages depend on, in this case geometry_msgs for Sphere.msg
+  DEPENDENCIES geometry_msgs std_msgs
 )
 
 install(DIRECTORY msg

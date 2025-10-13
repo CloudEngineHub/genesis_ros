@@ -12,10 +12,10 @@ scene:
     dt: 0.01
     floor_height: 0.0
 
-  show_Viewer: true
+  show_Viewer: false
 
   profiling_options:
-    show_FPS: false
+    show_FPS: true
     FPS_tracker_alpha: 0.9
 
   viewer_config:
@@ -232,17 +232,17 @@ world:
   #   height_field: null
 
 objects:
-  object_one:
-    name: object_one
-    morph:
-      path: "/home/vybhav/Desktop/newest_genesis/box.urdf"
-      pos: [5.0, 0.0, 0.0]
-      euler: [0.0, 0.0, 0.0]
-      fixed: true
+  # object_one:
+  #   name: object_one
+  #   morph:
+  #     path: "/home/vybhav/Desktop/newest_genesis/box.urdf"
+  #     pos: [5.0, 0.0, 0.0]
+  #     euler: [0.0, 0.0, 0.0]
+  #     fixed: true
 
 robots:
   robot_one:
-    visualize_contact: false
+    visualize_contact: true
     namespace: "robot"
     control_topic: control
     joint_state_target_topic: joint_commands
@@ -251,21 +251,35 @@ robots:
       left_wheel_steering_joint:
         kp: 30
         kv: 30
+        # stiffness: 10.0
+        # damping: 5.0
+        # armature: 0.0
+        # force_range: [-1000.0, 1000.0]
         command: position
       rear_left_wheel_joint:
         kp: 50
         kv: 50
+        # stiffness: 10.0
+        # damping: 5.0
+        # armature: 0.0
+        # force_range: [-1000.0, 1000.0]
         command: velocity
       rear_right_wheel_joint:
         kp: 50
         kv: 50
+        # stiffness: 10.0
+        # damping: 50.0
+        # armature: 0.0
+        # force_range: [-1000.0, 1000.0]
         command: velocity
       right_wheel_steering_joint:
         kp: 30
         kv: 30
+        # stiffness: 10.0
+        # damping: 5.0
+        # armature: 0.0
+        # force_range: [-1000.0, 1000.0]
         command: position
-
-
 
     morph:
       path: "/home/vybhav/Desktop/newest_genesis/ackerman.urdf"
@@ -282,6 +296,33 @@ robots:
       prioritize_urdf_material: false
       merge_fixed_links: false
       links_to_keep: [lidar_link,camera_link,laser_link]
+      
+      # type: drone
+      # file: "drone.urdf"
+      # scale: 1.0
+      # pos: [0.0, 0.0, 0.0]
+      # euler: [0.0, 0.0, 0.0]
+      # quat: null
+      # decimate: true
+      # decimate_face_num: 500
+      # decimate_aggressiveness: 5
+      # convexify: true
+      # decompose_nonconvex: false
+      # decompose_object_error_threshold: 0.15
+      # decompose_robot_error_threshold: .inf
+      # coacd_options: null
+      # visualization: true
+      # collision: true
+      # prioritize_urdf_material: false
+      # model: "CF2X"
+      # COM_link_name: null
+      # propellers_link_names: null
+      # propellers_link_name: ["prop0_link", "prop1_link", "prop2_link", "prop3_link"]
+      # propellers_spin: [-1, 1, -1, 1]
+      # merge_fixed_links: true
+      # links_to_keep: []
+      # default_armature: 0.1
+      # default_base_ang_damping_scale: 1e-5
 
     material:
       type: rigid
@@ -295,6 +336,41 @@ robots:
       sdf_min_res: 32
       sdf_max_res: 128
       gravity_compensation: 0
+
+      # type: hybrid
+      # material_rigid:
+      #   type: rigid
+      #   rho: 200.0
+      #   friction: null
+      #   needs_coup: true
+      #   coup_friction: 0.1
+      #   coup_softness: 0.002
+      #   coup_restitution: 0.0
+      #   sdf_cell_size: 0.005
+      #   sdf_min_res: 32
+      #   sdf_max_res: 128
+      #   gravity_compensation: 0
+
+      # material_soft:
+      #   type: fem.muscle
+      #   E: 1.0e4
+      #   nu: 0.45
+      #   rho: 1000
+      #   lam: null
+      #   mu: null
+      #   sampler: null
+      #   model: neohooken
+      #   n_groups: 1
+
+      fixed: false
+      use_default_coupling: false
+      damping: 1000
+      thickness: 0.05
+      soft_dv_coef: 0.01
+
+      func_instantiate_rigid_from_soft: null
+      func_instantiate_soft_from_rigid: null
+      func_instantiate_rigid_soft_association: null
 
     surface:
       color: null
@@ -312,7 +388,6 @@ robots:
       vis_mode: null
       smooth: true
       double_sided: null
-      beam_angle: 180
       normal_diff_clamp: 180
       recon_backend: splashsurf
       generate_foam: false
@@ -320,210 +395,95 @@ robots:
       diffuse_texture: null
       specular_trans: 0.0
       diffuse_trans: 0.0
-    
-    sensors:
-  # ----------------------------
-  # CAMERA (RGB, Depth, etc.)
-  # ----------------------------
-    # - name: front_cam
-    #   sensor_type: cam
-    #   link: lidar_link
-    #   Transform: [[  0.00,   0.00,  -1.00,   0.00],
-    #               [ -1.00,   0.00,   0.00,   0.00],
-    #               [  0.00,   1.00,   0.00,   0.00],
-    #               [  0.00,   0.00,   0.00,   1.00]]
-    #   topics: [rgb,depth,segmentation,normal]
-    #   frequency: 50
-    #   QOS_history: keep_last
-    #   QOS_depth: 10
-    #   QOS_reliability: reliable
-    #   QOS_durability: volatile
-    #   frame_id: lidar_link
-    #   # camera_type one of : ["rgb", "depth", "segmentation", "normal"]
-    #   camera_types: [rgb,depth,segmentation,normal]
-    #   model: pinhole
-    #   res: [640, 480]
-    #   vfov: 30
-    #   aperture: 2.8
-    #   focus_dist: null
-    #   GUI: false
-    #   spp: 256
-    #   denoise: true
-    #   near: 0.05
-    #   far: 10.0
-    #   noise_mean: 0.0
-    #   noise_std: 0.01
 
-    # # ----------------------------
-    # # RGBD CAMERA
-    # # ----------------------------
-    # - name: rgbd_front
-    #   sensor_type: rgbd
-    #   attached: false
-    #   entity: robot_one
-    #   link: camera_link
-    #   frame_id: camera_link
-    #   frequency: 15
-    #   tilt_angle: 0.0
-    #   Transform: [[  0.00,   0.00,  -1.00,   0.00],
-    #               [ -1.00,   0.00,   0.00,   0.00],
-    #               [  0.00,   1.00,   0.00,   0.00],
-    #               [  0.00,   0.00,   0.00,   1.00]]
-
-    #   rgb:
-    #     name: rgb_cam
-    #     topic: rgb_cam
-    #     QOS_history: keep_last
-    #     QOS_depth: 10
-    #     QOS_reliability: reliable
-    #     QOS_durability: volatile
-    #     frequency: 15
-    #     res: [640, 480]
-    #     model: pinhole
-    #     vfov: 30
-    #     aperture: 2.8
-    #     focus_dist: null
-    #     GUI: false
-    #     spp: 256
-    #     denoise: true
-    #     near: 0.05
-    #     far: 10.0
-    #     noise_mean: 0.0
-    #     noise_std: 0.01
-
-    #   depth:
-    #     name: depth_cam
-    #     topic: points_dep
-    #     QOS_history: keep_last
-    #     QOS_depth: 10
-    #     QOS_reliability: reliable
-    #     QOS_durability: volatile
-    #     frequency: 15
-    #     res: [640, 480]
-    #     model: pinhole
-    #     vfov: 30
-    #     aperture: 2.8
-    #     focus_dist: null
-    #     GUI: false
-    #     spp: 256
-    #     denoise: true
-    #     near: 0.05
-    #     far: 10.0
-    #     noise_mean: 0.0
-    #     noise_std: 0.02
-
-    # # ----------------------------
-    # # SECTIONAL LIDAR
-    # # ----------------------------
-    # - name: front_sec_lidar
-    #   sensor_type: sectional_lidar
-    #   link: lidar_link
-    #   topic: points_sec
-    #   QOS_history: keep_last
-    #   QOS_depth: 10
-    #   QOS_reliability: reliable
-    #   QOS_durability: volatile
-    #   frequency: 10
-    #   frame_id: lidar_link
-    #   tilt_angle: 0.0
-    #   model: pinhole
-    #   res: [640, 480]
-    #   vfov: 60
-    #   aperture: 2.8
-    #   focus_dist: null
-    #   GUI: false
-    #   spp: 256
-    #   denoise: true
-    #   near: 0.05
-    #   far: 10.0
-    #   noise_mean: 0.0
-    #   noise_std: 0.01
-    #   Transform: [[  0.00,   0.00,  -1.00,   0.00],
-    #               [ -1.00,   0.00,   0.00,   0.00],
-    #               [  0.00,   1.00,   0.00,   0.00],
-    #               [  0.00,   0.00,   0.00,   1.00]]
-
-    # # ----------------------------
-    # # 3D LIDAR
-    # # ----------------------------
-    # - name: top_lidar
-    #   sensor_type: 3d_lidar
-    #   attached: false
-    #   entity: robot_one
-    #   link: lidar_link
-    #   topic: top_lidar_points
-    #   QOS_history: keep_last
-    #   QOS_depth: 10
-    #   QOS_reliability: reliable
-    #   QOS_durability: volatile
-    #   frequency: 25
-    #   frame_id: lidar_link
-    #   tilt_angle: 0.0
-    #   horizontal_min_angle: -3.14  # radians
-    #   horizontal_max_angle: 3.14   # radians
-    #   h_samples: 1200
-    #   v_samples: 16
-    #   near: 0.05
-    #   far: 15.0
-    #   noise_mean: 0.0
-    #   noise_std: 0.01
-    #   Transform: [[  0.00,   0.00,  -1.00,   0.00],
-    #               [ -1.00,   0.00,   0.00,   0.00],
-    #               [  0.00,   1.00,   0.00,   0.00],
-    #               [  0.00,   0.00,   0.00,   1.00]]
-
-    # # # ----------------------------
-    # # # LASER SCAN
-    # # # ----------------------------
-    # - name: laser_front
-    #   sensor_type: laser_scan
-    #   link: laser_link
-    #   topic: scan
-    #   QOS_history: keep_last
-    #   QOS_depth: 10
-    #   QOS_reliability: reliable
-    #   QOS_durability: volatile
-    #   frequency: 25
-    #   frame_id: laser_link
-    #   horizontal_min_angle: -3.14
-    #   horizontal_max_angle: 3.14
-    #   h_samples: 2400
-    #   noise_mean: 0.0
-    #   noise_std: 0.005
-    #   range_min: 0.05
-    #   range_max: 10.0
-    #   Transform: [[  0.00,   0.00,  -1.00,   0.00],
-    #               [ -1.00,   0.00,   0.00,   0.00],
-    #               [  0.00,   1.00,   0.00,   0.00],
-    #               [  0.00,   0.00,   0.00,   1.00]]
-
-    # # ----------------------------
-    # # IMU
-    # # ----------------------------
-    - name: base_imu
-      sensor_type: imu
-      topic: imu
-      frequency: 50
-      frame_id: imu_link
+    sensors: # all the sensor configs are in the <sensor_configs> section
+    # ----------------------------
+    # CAMERA (RGB, Depth, segmentation, normal.)
+    # Although multiple camera types can be specified for one section, it is recommneded to set one camera type per sensor
+    # i.e. if you want RGB and Depth, create two sensors with same transform but different camera_types
+    # ----------------------------
+    - name: front_cam
+      sensor_type: cam
+      link: lidar_link
+      # Transform: [[  0.00,   0.00,  -1.00,   0.00],
+      #             [ -1.00,   0.00,   0.00,   0.00],
+      #             [  0.00,   1.00,   0.00,   0.00],
+      #             [  0.00,   0.00,   0.00,   1.00]]
+      pos: [0,0,0]
+      euler: [90,0,-90]
+      topics: [rgb]
+      frequency: 15
       QOS_history: keep_last
-      QOS_depth: 10
+      QOS_depth: 25
       QOS_reliability: reliable
       QOS_durability: volatile
+      frame_id: lidar_link
+      # camera_type one of : ["rgb", "depth", "segmentation", "normal"]
+      # normal camera causes issue, idk why
+      camera_types: [rgb]
+      model: pinhole
+      res: [640, 480]
+      vfov: 30
+      aperture: 2.8
+      focus_dist: null
+      GUI: false
+      spp: 256
+      # denoise: true
+      near: 0.05
+      far: 10.0
+      add_noise: false
+      noise_mean: 0.0
+      noise_std: 0.01
 
-    # # ----------------------------
-    # # CONTACT SENSOR
-    # # ----------------------------
-    # - name: gripper_contacts
-    #   sensor_type: contact
-    #   topic: /robot_one/contacts
-    #   QOS_history: keep_last
+    # - name: grid_lidar_1
+    #   sensor_type: grid_lidar
+    #   link: base_link
+    #   frame_id: base_link
+    #   topic: grid_lidar_topic
+    #   frequency: 30.0
+    #   near: 0.01
+    #   far: 10.0
+    #   pos_offset: [0.0, 0.0, 1.75]
+    #   euler_offset: [0.0, 0.0, 0.0]
+    #   resolution: 0.1
+    #   grid_size: [1, 1]
+    #   ray_direction_euler: [0, 0, -90]
+    #   draw_points: false
+    #   draw_point_radius: 0.02
+    #   ray_start_color: [0.5, 0.5, 1.0, 1.0]
+    #   ray_hit_color: [1.0, 0.5, 0.5, 1.0]
+    #   return_points_in_world_frame: false
+    #   noise_mean: 0.0
+    #   noise_std: 0.0
+    #   QOS_history: KEEP_LAST
     #   QOS_depth: 10
-    #   QOS_reliability: reliable
-    #   QOS_durability: volatile
-    #   frequency: 20
-    #   entity: robot_one
-    #   link: gripper_link
-    #   target_object_name: object1
-    #   exclude_self_contact: true
+    #   QOS_reliability: RELIABLE
+    #   QOS_durability: VOLATILE
+
+    - name: lidar_1
+      sensor_type: 3d_lidar
+      link: lidar_link
+      frame_id: lidar_link
+      topic: lidar_topic
+      frequency: 10.0
+      near: 0.3
+      far: 100.0
+      pos_offset: [0.0, 0.0, 0.5]
+      euler_offset: [0.0, 0.0, 0.0]
+      fov: [360.0, 30.0]
+      n_points: [64, 128]
+      draw_points: true
+      draw_point_radius: 0.03
+      ray_start_color: [0.5, 0.5, 1.0, 1.0]
+      ray_hit_color: [1.0, 0.0, 0.0, 1.0]
+      return_points_in_world_frame: false
+      noise_mean: 0.01
+      noise_std: 0.02
+      QOS_history: KEEP_LAST
+      QOS_depth: 5
+      QOS_reliability: RELIABLE
+      QOS_durability: VOLATILE
+
+
 
   

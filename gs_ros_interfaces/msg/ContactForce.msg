@@ -1,0 +1,2 @@
+string link_name
+geometry_msgs/Vector3 contact_force

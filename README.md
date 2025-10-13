@@ -29,10 +29,11 @@ This project provides the essential tools to kickstart your robotics development
 -   📷 **Camera**: Publishes RGB, depth, semantic segmentation, and surface normal images.
 -   📸 **RGBD Camera**: A convenient wrapper for synchronized RGB and depth image publishing.
 -   🛰️ **IMU**: Simulates an Inertial Measurement Unit.
--   📏 **Sectional Lidar**: A 3D Lidar from one camera view.
--   🌐 **3D Lidar**: An approximation of a 360 degree 3D Lidar using a ring of 16 evenly spaced cameras.
--   📡 **LaserScan** (In Development)
--   💥 **Contact Sensor** (In Development)
+-   📏 **Sectional Lidar**: A ray based lidar covering a section of the space(analogus to a depth camera).
+-   🌐 **3D Lidar**: A ray based 360 degree 3D Lidar.
+-   📡 **LaserScan** A 360 degree laser-scan with one vertical channel, commonly used in robotics 
+-   💥 **Contact Force Sensor** A tactile sensor to measure the force experinced by a speified link
+-   💥 **contact senor** A binary tactile sensor to check if an entity is in contact with any other entity 
 
 ---
 
@@ -42,12 +43,12 @@ This project provides the essential tools to kickstart your robotics development
 
 1.  **ROS 2**: This package is developed for ROS 2. Ensure you have a working installation (e.g., Humble, Iron).
 2.  **Genesis Simulator**: Install Genesis by following the instructions in the official [Genesis repository](https://github.com/Genesis-Embodied-AI/Genesis.git).
-    > **Note**: `gs_ros` was tested with Genesis `v0.3.1`. Newer versions may have compatibility issues. Please report any problems you encounter!
+    > **Note**: `gs_ros` was tested with Genesis `v0.3.4`. Newer versions may have compatibility issues. Please report any problems you encounter!
 
 ### Steps
 
 1.  **Downgrade NumPy**
-    The default NumPy version installed with Genesis may not be compatible with ROS 2. Downgrade to a compatible version:
+    The default NumPy version installed with Genesis may not be compatible with ROS 2. Downgrade to a compatible version(optional):
     ```bash
     pip install numpy==1.26.4
     ```
@@ -73,7 +74,7 @@ This project provides the essential tools to kickstart your robotics development
     cd ~/ros2_ws
     colcon build
     ```
-    > **Troubleshooting**: If you encounter an `ImportError: No module named 'em'`, it might be due to a conflict with a Python virtual environment. Deactivate any active virtual environment and try building with the `--merge-install` flag:
+    > **Troubleshooting**: If you encounter an `ImportError: No module named 'em'`, it might be due to a conflict with a Python virtual environment. Deactivate any active virtual environment run the `colcon clean workspace` command and try building with the `--merge-install` flag:
     > `colcon build --merge-install`
 
     After a successful build, source your workspace's setup file:
@@ -86,9 +87,9 @@ This project provides the essential tools to kickstart your robotics development
 ## 🧪 Example Usage
 
 1. **Configure Asset Paths**
-    Before launching, you must update the `parent_config.yaml` file to point to the correct paths for your local assets.
+    Before launching, you must update the `parent_config.yaml` file to point to the correct paths for your local assets, and use the necessary sensors.
 
-2. **Start the genesis Simulator and the gs_ros bridge***
+2. **Start the genesis Simulator and the gs_ros bridge**
 
     ```bash
     python test_import.py
@@ -105,10 +106,10 @@ This project provides the essential tools to kickstart your robotics development
 
 ## 📝 Known Issues & Limitations
 
--   **Genesis Version**: Genesis is under active development. Using the latest version from their `main` branch will likely cause issues. Sticking to a tagged release like `v0.3.1` is recommended.
+-   **Genesis Version**: Genesis is under active development. Using the latest version from their `main` branch will likely cause issues. Sticking to a tagged release like `v0.3.4` is recommended. but any version after `v0.3.4` should be mostly compatable
 -   **Parallel Environments**: Support for parallelized simulation environments is not yet implemented but may be added in the future.
 -   **Sensor Models**: Currently, no advanced sensor noise or distortion models are included. This is planned for a future release.
--   **3D Lidar Approximation**: The 3D Lidar is not a true ray-based Lidar. It is a resource-intensive approximation created by stitching together data from 16 radially-arranged cameras.
+-   **topic_based_ros2_control**: This external package used in gs_ros is set to be deprecated shortly, modifying the ros2_control tag in the gs_ros2_control_demos is advised. The suggested alternative of [topic_based_ros2_control](https://github.com/PickNikRobotics/topic_based_ros2_control) is [topic_based_hardware_interfaces](https://github.com/ros-controls/topic_based_hardware_interfaces). gs_ros will be migrated to use the suggested alternative in a future release
 
 ---
 

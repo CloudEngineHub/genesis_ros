@@ -50,45 +50,6 @@ def create_qos_profile(
 
     return qos
 
-
-
-def get_camera_transformation_matrices(n_cameras,h_fov=None,tilt_angle=None):
-    if h_fov is not None:
-        step=h_fov/n_cameras
-    else:
-        step=None
-    T_MAT_TILT=None
-    T_MAT_X=np.array([
-                [1,          0,           0],
-                [0, np.cos(np.deg2rad(-90)), -np.sin(np.deg2rad(-90))],
-                [0, np.sin(np.deg2rad(-90)),  np.cos(np.deg2rad(-90))]
-            ])
-    if tilt_angle is not None:
-        T_MAT_TILT=np.array([
-                    [1,          0,           0],
-                    [0, np.cos(np.deg2rad(-tilt_angle)), -np.sin(np.deg2rad(-tilt_angle))],
-                    [0, np.sin(np.deg2rad(-tilt_angle)),  np.cos(np.deg2rad(-tilt_angle))]
-                ])
-    else:
-        T_MAT_TILT=None
-    T_MATS_Z=[]
-    
-    for i in range(n_cameras):
-        if step is None:
-            theta=-np.deg2rad(90)
-        else:
-            theta=np.deg2rad(i*step)-np.deg2rad(90)
-        cos_t = np.cos(theta)
-        sin_t = np.sin(theta)
-            
-        MAT= np.array([
-                [cos_t, -sin_t, 0],
-                [sin_t,  cos_t, 0],
-                [0,      0,     1]
-            ])
-        T_MATS_Z.append(MAT)
-    return T_MAT_X,T_MATS_Z,T_MAT_TILT
-
 def quat_angle_difference(q1, q2):
     """
     Compute the angle difference (in radians) between two unit quaternions.
@@ -111,42 +72,7 @@ def quat_angle_difference(q1, q2):
     angle = 2 * np.arccos(np.abs(dot))
     return angle
 
-def rotate_around_line_local_x(p1, p2, angle_deg):
-    def normalize(v):
-        norm = np.linalg.norm(v)
-        if norm == 0:
-            raise ValueError("Zero-length vector")
-        return v / norm
-
-    def rodrigues_rotation(v, axis, angle_rad):
-        axis = normalize(axis)
-        return (v * np.cos(angle_rad) +
-                np.cross(axis, v) * np.sin(angle_rad) +
-                axis * np.dot(axis, v) * (1 - np.cos(angle_rad)))
-
-    p1 = np.array(p1, dtype=float)
-    p2 = np.array(p2, dtype=float)
-    v = p2 - p1
-
-    # Local z-axis = direction of the line
-    z_local = normalize(v)
-
-    # Choose a global "up" vector that isn't parallel to z_local
-    global_up = np.array([0, 0, 1])
-    if np.allclose(z_local, global_up) or np.allclose(z_local, -global_up):
-        global_up = np.array([0, 1, 0])
-
-    # Local x-axis = cross(up, z_local)
-    x_local = normalize(np.cross(global_up, z_local))
-
-    # Rotate vector v around x_local by angle
-    angle_rad = np.deg2rad(angle_deg)
-    v_rotated = rodrigues_rotation(v, x_local, angle_rad)
-
-    return p1 + v_rotated
-
 def get_entity(entities,idx=None,name=None):
-    # print(entities[0][:-1])
     if idx is None and name is None:
         return None
     elif idx is not None:
@@ -167,7 +93,6 @@ def get_dofs_idx(robot,joint_names):
             for joint in robot.joints:
                 if joint.name ==joint_name:
                     motor_dofs.append(joint.dofs_idx_local[0])
-        # print("motor dofs:",motor_dofs)
         return motor_dofs
     
 def get_links_idx(robot,link_names):
@@ -507,7 +432,36 @@ def make_morph(morph_config):
     if morph_config is None:
         return None
     entity_path=morph_config["path"]
-    if entity_path.lower().endswith(".urdf"):
+    morph_type=morph_config.get("type", None)
+    if morph_type=="drone":
+        morph=gs.mprphs.Drone(
+            file = morph_config.get("file"),
+            scale = morph_config.get("scale", 1.0),
+            pos = morph_config.get("pos", (0.0, 0.0, 0.0)),
+            euler = morph_config.get("euler", (0.0, 0.0, 0.0)),
+            quat = morph_config.get("quat"),
+            decimate = morph_config.get("decimate", True),
+            decimate_face_num = morph_config.get("decimate_face_num", 500),
+            decimate_aggressiveness = morph_config.get("decimate_aggressiveness", 5),
+            convexify = morph_config.get("convexify", True),
+            decompose_nonconvex = morph_config.get("decompose_nonconvex", False),
+            decompose_object_error_threshold = morph_config.get("decompose_object_error_threshold", 0.15),
+            decompose_robot_error_threshold = morph_config.get("decompose_robot_error_threshold", float("inf")),
+            coacd_options = morph_config.get("coacd_options"),
+            visualization = morph_config.get("visualization", True),
+            collision = morph_config.get("collision", True),
+            prioritize_urdf_material = morph_config.get("prioritize_urdf_material", False),
+            model = morph_config.get("model", "CF2X"),
+            COM_link_name = morph_config.get("COM_link_name"),
+            propellers_link_names = morph_config.get("propellers_link_names"),
+            propellers_link_name = morph_config.get("propellers_link_name", ("prop0_link", "prop1_link", "prop2_link", "prop3_link")),
+            propellers_spin = morph_config.get("propellers_spin", (-1, 1, -1, 1)),
+            merge_fixed_links = morph_config.get("merge_fixed_links", True),
+            links_to_keep = morph_config.get("links_to_keep", []),
+            default_armature = morph_config.get("default_armature", 0.1),
+            default_base_ang_damping_scale = morph_config.get("default_base_ang_damping_scale", 1e-5)
+        )
+    elif morph_type=="URDF" or entity_path.lower().endswith(".urdf"):
         morph=gs.morphs.URDF(file=entity_path,
                         pos=morph_config.get("pos", (0.0, 0.0, 0.0)),
                         euler=morph_config.get("euler", (0.0, 0.0, 0.0)),
@@ -523,7 +477,7 @@ def make_morph(morph_config):
                         merge_fixed_links=morph_config.get("merge_fixed_links", True),
                         links_to_keep=morph_config.get("links_to_keep", [])
                         )
-    elif entity_path.lower().endswith(".mjcf"):
+    elif morph_type=="MJCF" or entity_path.lower().endswith(".xml"):
         morph=gs.morphs.MJCF(file=entity_path,
                         pos = morph_config.get("pos", None),
                         euler = morph_config.get("euler", None),
@@ -561,11 +515,11 @@ def make_morph(morph_config):
                         quality = morph_config.get("quality", True),
                         verbose = morph_config.get("verbose", 0),
                         force_retet = morph_config.get("force_retet", False)
-
                         )
     return morph
 
 def make_material(material_config):
+    #TODO: add more materials
     if material_config is None:
         return None
     if material_config["type"].lower() =="rigid":
@@ -581,6 +535,28 @@ def make_material(material_config):
             sdf_max_res = material_config.get("sdf_max_res", 128),
             gravity_compensation = material_config.get("gravity_compensation", 0)
             )
+    elif material_config["type"].lower() =="fem.muscle":
+        material=gs.materials.FEM.Muscle(  # to allow setting group
+            E=float(material_config.get("E", 1e6)),
+            nu=material_config.get("nu", 0.2),
+            rho=material_config.get("rho", 1000.0),
+            model=material_config.get("model", "neohooken"),
+        ),
+    elif material_config["type"].lower() =="hybrid":
+        material_rigid=make_material(material_config.get("material_rigid", None))
+        material_soft=make_material(material_config.get("material_soft", None))
+        material=gs.materials.Hybrid(
+            material_rigid=material_rigid,
+            material_soft=material_soft,
+            fixed=material_config.get('fixed', False),
+            use_default_coupling=material_config.get('use_default_coupling', False),
+            damping=material_config.get('damping', 0.0),
+            thickness=material_config.get('thickness', 0.05),
+            soft_dv_coef=material_config.get('soft_dv_coef', 0.01),
+            func_instantiate_rigid_from_soft=None,
+            func_instantiate_soft_from_rigid=None,
+            func_instantiate_rigid_soft_association=None,
+        )
     return material
         
 def make_surface(surface_config):
@@ -602,7 +578,6 @@ def make_surface(surface_config):
                     vis_mode = surface_config.get("vis_mode", None),
                     smooth = surface_config.get("smooth", True),
                     double_sided = surface_config.get("double_sided", None),
-                    beam_angle = surface_config.get("beam_angle", 180),
                     normal_diff_clamp = surface_config.get("normal_diff_clamp", 180),
                     recon_backend = surface_config.get("recon_backend", 'splashsurf'),
                     generate_foam = surface_config.get("generate_foam", False),
