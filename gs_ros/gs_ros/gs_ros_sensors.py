@@ -423,7 +423,6 @@ class GsRosSensors:
         def timer_callback(pcd_publisher,add_noise):
             if self.scene.is_built:
                 assert grid_lidar._is_built , f"grid liadr sensor is not built"
-                self.scene.draw_debug_points(grid_lidar.read()[0].detach().cpu().numpy())
                 pcd_msg=grid_raycaster_to_pcd_msg(grid_lidar,
                                                 stamp=get_current_timestamp(self.scene),
                                                 frame_id=grid_lidar_config.get("frame_id"),

@@ -14,7 +14,7 @@ class GsRosBridge:
                  ros_clock_node=None,ros_control_node=None,ros_service_node=None):
 
         self.ros_node=ros_node
-        self.all_nodes_to_spin=[]
+        self.all_nodes_to_spin=[self.ros_node]
         if ros_clock_node is not None:
             self.ros_clock_node=ros_clock_node
             self.all_nodes_to_spin.append(self.ros_clock_node)

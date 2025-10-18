@@ -74,7 +74,8 @@ def generate_launch_description():
             '--param-file',
             robot_controllers,
             ],
-        namespace=namespace
+        namespace=namespace,
+        # remappings=[('/robot/tricycle_controller/cmd_vel','/cmd_vel')]
     )
     
     ros2_control_node = Node(

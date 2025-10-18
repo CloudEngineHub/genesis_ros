@@ -141,7 +141,7 @@ def make_gs_scene(scene_config):
         coupler_options = make_coupler_options(scene_config.get("coupler_config", None)),
         tool_options = gs.options.ToolOptions(
             dt=scene_config.get("tool_config", {}).get("dt", 1e-2),
-            floor_height=scene_config.get("tool_config", {}).get("floor_height", None)
+            floor_height=scene_config.get("tool_config", {}).get("floor_height", 0)
         ),
         rigid_options = make_rigid_options(scene_config.get("rigid_config", None)),
         avatar_options = make_avatar_options(scene_config.get("avatar_config", None)),

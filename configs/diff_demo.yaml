@@ -1,0 +1,210 @@
+scene:
+  n_envs: 1 # shouldnt be change
+  sim:
+    dt: 0.05
+    substeps: 1
+    substeps_local: null
+    gravity: [0.0, 0.0, -9.81]
+    floor_height: 0.0
+    requires_grad: false
+
+  show_Viewer: true
+
+  profiling_options:
+    show_FPS: true
+    FPS_tracker_alpha: 0.9
+
+  viewer_config:
+    res: null
+    run_in_thread: false
+    refresh_rate: 60
+    max_FPS: 60
+    camera_pos: [3.5, 0.5, 2.5]
+    camera_lookat: [0.0, 0.0, 0.5]
+    camera_up: [0.0, 0.0, 1.0]
+    camera_fov: 40
+    enable_interaction: false
+
+  vis_config:
+    show_world_frame: false
+    world_frame_size: 1.0
+    show_link_frame: false
+    link_frame_size: 0.2
+    show_cameras: false
+    shadow: false
+    plane_reflection: false
+    env_separate_rigid: false
+    background_color: [0.04, 0.08, 0.12]
+    ambient_light: [0.1, 0.1, 0.1]
+    visualize_mpm_boundary: false
+    visualize_sph_boundary: false
+    visualize_pbd_boundary: false
+    segmentation_level: "link"
+    render_particle_as: "sphere"
+    particle_size_scale: 1.0
+    contact_force_scale: 0.01
+    n_support_neighbors: 12
+    n_rendered_envs: null
+    rendered_envs_idx: null
+    lights:
+      - type: directional
+        dir: [-1, -1, -1]
+        color: [1.0, 1.0, 1.0]
+        intensity: 5.0
+
+  rigid_config:
+    dt: null
+    gravity: null
+    enable_collision: true
+    enable_joint_limit: true
+    enable_self_collision: false
+    enable_adjacent_collision: false
+    disable_constraint: false
+    max_collision_pairs: 300
+    integrator: 1
+    IK_max_targets: 6
+    batch_links_info: false
+    batch_joints_info: false
+    batch_dofs_info: false
+    constraint_solver: 1
+    iterations: 50
+    tolerance: 1e-8
+    ls_iterations: 50
+    ls_tolerance: 0.01
+    sparse_solve: false
+    contact_resolve_time: null
+    use_contact_island: false
+    box_box_detection: false
+    use_hibernation: false
+    hibernation_thresh_vel: 0.001
+    hibernation_thresh_acc: 0.01
+    max_dynamic_constraints: 8
+    enable_multi_contact: true
+    enable_mujoco_compatibility: false
+    use_gjk_collision: false
+
+world:
+  plane: true
+
+objects:
+
+robots:
+  robot_one:
+    visualize_contact: false
+    namespace: "robot"
+    control_topic: control
+    joint_state_target_topic: joint_commands
+    joint_state_target_topic_frequency: 50
+    joint_properties: 
+      left_wheel_joint:
+        kp: 50
+        kv: 50
+        # stiffness: 10.0
+        # damping: 5.0
+        # armature: 0.0
+        # force_range: [-1000.0, 1000.0]
+        command: velocity
+      right_wheel_joint:
+        kp: 50
+        kv: 50
+        # stiffness: 10.0
+        # damping: 50.0
+        # armature: 0.0
+        # force_range: [-1000.0, 1000.0]
+        command: velocity
+
+    morph:
+      path: "src/gs_ros2_control_demos/urdf/test_diff_drive.xacro.urdf"
+      pos: [0.0, 0.0, 0.0]
+      euler: [0.0, 0.0, 0.0]
+      quat: null
+      visualization: true
+      collision: true
+      requires_jac_and_IK: true
+      scale: 1.0
+      convexify: null
+      recompute_inertia: false
+      fixed: false
+      prioritize_urdf_material: false
+      merge_fixed_links: false
+      links_to_keep: [lidar_link,camera_link,laser_link]
+
+    material:
+      type: rigid
+      rho: 200.0
+      friction: null
+      needs_coup: true
+      coup_friction: 0.1
+      coup_softness: 0.002
+      coup_restitution: 0.0
+      sdf_cell_size: 0.005
+      sdf_min_res: 32
+      sdf_max_res: 128
+      gravity_compensation: 0
+
+    sensors: # all the sensor configs are in the sensor_configs.yaml section
+    # ----------------------------
+    # CAMERA (RGB, Depth, segmentation, normal.)
+    # Although multiple camera types can be specified for one section, it is recommneded to set one camera type per sensor
+    # i.e. if you want RGB and Depth, create two sensors with same transform but different camera_types
+    # ----------------------------
+    - name: front_cam
+      sensor_type: cam
+      link: lidar_link
+      # Transform: [[  0.00,   0.00,  -1.00,   0.00],
+      #             [ -1.00,   0.00,   0.00,   0.00],
+      #             [  0.00,   1.00,   0.00,   0.00],
+      #             [  0.00,   0.00,   0.00,   1.00]]
+      pos: [0,0,0]
+      euler: [90,0,-90]
+      topics: [rgb]
+      frequency: 15
+      QOS_history: keep_last
+      QOS_depth: 25
+      QOS_reliability: reliable
+      QOS_durability: volatile
+      frame_id: lidar_link
+      # camera_type one of : ["rgb", "depth", "segmentation", "normal"]
+      # normal camera causes issue, idk why
+      camera_types: [rgb]
+      model: pinhole
+      res: [640, 480]
+      vfov: 30
+      aperture: 2.8
+      focus_dist: null
+      GUI: false
+      spp: 256
+      # denoise: true
+      near: 0.05
+      far: 10.0
+      add_noise: false
+      noise_mean: 0.0
+      noise_std: 0.01
+
+    - name: lidar_1
+      sensor_type: 3d_lidar
+      link: lidar_link
+      frame_id: lidar_link
+      topic: lidar_topic
+      frequency: 10.0
+      near: 0.3
+      far: 100.0
+      pos_offset: [0.0, 0.0, 0.5]
+      euler_offset: [0.0, 0.0, 0.0]
+      fov: [360.0, 30.0]
+      n_points: [64, 128]
+      draw_points: false
+      draw_point_radius: 0.03
+      ray_start_color: [0.5, 0.5, 1.0, 1.0]
+      ray_hit_color: [1.0, 0.0, 0.0, 1.0]
+      return_points_in_world_frame: false
+      noise_mean: 0.01
+      noise_std: 0.02
+      QOS_history: KEEP_LAST
+      QOS_depth: 5
+      QOS_reliability: RELIABLE
+      QOS_durability: VOLATILE
+
+
+
+  

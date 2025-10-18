@@ -30,6 +30,7 @@
       denoise: true
       near: 0.05
       far: 10.0
+      add_noise: false
       noise_mean: 0.0
       noise_std: 0.01
 
@@ -68,7 +69,8 @@
         denoise: true
         near: 0.05
         far: 10.0
-        noise_mean: 0.0
+        add_noise: false
+      noise_mean: 0.0
         noise_std: 0.01
 
       depth:
@@ -90,7 +92,8 @@
         fov_vertical: 60.0
         draw_points: true
         return_points_in_world_frame: false
-        noise_mean: 0.0
+        add_noise: false
+      noise_mean: 0.0
         noise_std: 0.01
         QOS_history: KEEP_LAST
         QOS_depth: 10
@@ -118,6 +121,7 @@
       ray_start_color: [0.5, 0.5, 1.0, 1.0]
       ray_hit_color: [1.0, 0.5, 0.5, 1.0]
       return_points_in_world_frame: false
+      add_noise: false
       noise_mean: 0.0
       noise_std: 0.0
       QOS_history: KEEP_LAST
@@ -148,6 +152,7 @@
       fov_vertical: 60.0
       draw_points: true
       return_points_in_world_frame: false
+      add_noise: false
       noise_mean: 0.0
       noise_std: 0.01
       QOS_history: KEEP_LAST
@@ -175,6 +180,7 @@
       ray_start_color: [0.5, 0.5, 1.0, 1.0]
       ray_hit_color: [1.0, 0.0, 0.0, 1.0]
       return_points_in_world_frame: false
+      add_noise: false
       noise_mean: 0.01
       noise_std: 0.02
       QOS_history: KEEP_LAST
@@ -199,6 +205,7 @@
       resolution: 720
       draw_points: false
       return_points_in_world_frame: false
+      add_noise: false
       noise_mean: 0.0
       noise_std: 0.01
       QOS_history: KEEP_LAST

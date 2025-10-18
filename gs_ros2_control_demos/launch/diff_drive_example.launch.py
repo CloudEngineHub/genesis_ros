@@ -26,6 +26,7 @@ from launch_ros.substitutions import FindPackageShare
 def generate_launch_description():
     # Launch Arguments
     use_sim_time = LaunchConfiguration('use_sim_time', default=True)
+    namespace = LaunchConfiguration('namespace', default="robot")
 
     # Get URDF via xacro
     robot_description_content = Command(
@@ -51,13 +52,19 @@ def generate_launch_description():
         package='robot_state_publisher',
         executable='robot_state_publisher',
         output='screen',
-        parameters=[robot_description]
+        parameters=[robot_description],
+        namespace=namespace
     )
 
     joint_state_broadcaster_spawner = Node(
         package='controller_manager',
         executable='spawner',
-        arguments=['joint_state_broadcaster'],
+        arguments=[
+            'joint_state_broadcaster',
+            '--param-file',
+            robot_controllers,
+            ],
+        namespace=namespace
     )
     diff_drive_base_controller_spawner = Node(
         package='controller_manager',
@@ -67,9 +74,22 @@ def generate_launch_description():
             '--param-file',
             robot_controllers,
             ],
+        namespace=namespace,
+        # remappings=[('/robot/diff_drive_base_controller/cmd_vel_unstamped','/cmd_vel')]
+    )
+    ros2_control_node = Node(
+        package="controller_manager",
+        executable="ros2_control_node",
+        parameters=[robot_controllers],
+        remappings=[
+            ("/robot/controller_manager/robot_description", f"/robot/robot_description"),
+        ],
+        output="screen",
+        namespace=namespace
     )
 
     return LaunchDescription([
+        joint_state_broadcaster_spawner,
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=joint_state_broadcaster_spawner,
@@ -77,9 +97,14 @@ def generate_launch_description():
             )
         ),
         node_robot_state_publisher,
+        ros2_control_node,
         # Launch Arguments
         DeclareLaunchArgument(
             'use_sim_time',
             default_value=use_sim_time,
             description='If true, use simulated clock'),
+        DeclareLaunchArgument(
+            'namespace',
+            default_value=namespace,
+            description='Namespace to be used'),
     ])

@@ -140,7 +140,7 @@ class GsRosRobotControl:
             self.robot.control_dofs_force(target_qpos,motor_dofs)
         
     def setup_joint_state_target_subscriber(self):
-        gs.logger.info("joint state target subscribers started")
+        gs.logger.info("joint state target subscriber started")
         def joint_state_target_callback(msg):
             motor_dofs=get_dofs_idx(self.robot,msg.name)
             dof_idx_table={}

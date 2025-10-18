@@ -63,7 +63,6 @@ def points_to_pcd_msg(input_pc,stamp,frame_id):
         arr = input_pc.astype(np.float32)
         cloud_arr = np.core.records.fromarrays(arr.T, names='x,y,z', formats='f4,f4,f4')
         cloud_arr = np.atleast_2d(cloud_arr)
-
         # Create PointCloud2 message
         msg = PointCloud2()
         msg.height = cloud_arr.shape[0]

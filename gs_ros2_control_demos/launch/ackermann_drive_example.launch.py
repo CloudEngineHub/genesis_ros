@@ -74,7 +74,7 @@ def generate_launch_description():
             robot_controllers,
             ],        
         namespace=namespace,
-        remappings=[('/robot/ackermann_steering_controller/reference','/cmd_vel')]
+        # remappings=[('/robot/ackermann_steering_controller/reference','/cmd_vel')]
     )
     
     ros2_control_node = Node(
