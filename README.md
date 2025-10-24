@@ -59,6 +59,7 @@ This project provides the essential tools to kickstart your robotics development
     # Example for a workspace in ~/ros2_ws
     cd ~/ros2_ws/src
     git clone https://github.com/vybhav-ibr/genesis_ros.git .
+    git submodule update --remote
     ```
 
 3.  **Install Dependencies**

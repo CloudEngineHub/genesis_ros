@@ -1,3 +1,4 @@
 [submodule "topic_based_ros2_control"]
 	path = topic_based_ros2_control
 	url = https://github.com/PickNikRobotics/topic_based_ros2_control.git
+	branch = main
