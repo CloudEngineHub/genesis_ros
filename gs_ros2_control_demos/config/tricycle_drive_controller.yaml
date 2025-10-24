@@ -1,6 +1,7 @@
 controller_manager:
   ros__parameters:
     update_rate: 50 # Hz
+    robot_description: "robot_description"
 
     /**/tricycle_controller:
       type: tricycle_controller/TricycleController
