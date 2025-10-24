@@ -43,7 +43,7 @@ This project provides the essential tools to kickstart your robotics development
 
 1.  **ROS 2**: This package is developed for ROS 2. Ensure you have a working installation (e.g., Humble, Iron).
 2.  **Genesis Simulator**: Install Genesis by following the instructions in the official [Genesis repository](https://github.com/Genesis-Embodied-AI/Genesis.git).
-    > **Note**: `gs_ros` was tested with Genesis `v0.3.4`. Newer versions may have compatibility issues. Please report any problems you encounter!
+    > **Note**: `gs_ros` was tested with Genesis `v0.3.5`. Newer versions may have compatibility issues. Please report any problems you encounter!
 
 ### Steps
 
@@ -106,7 +106,7 @@ This project provides the essential tools to kickstart your robotics development
 
 ## 📝 Known Issues & Limitations
 
--   **Genesis Version**: Genesis is under active development. Using the latest version from their `main` branch will likely cause issues. Sticking to a tagged release like `v0.3.4` is recommended. but any version after `v0.3.4` should be mostly compatable
+-   **Genesis Version**: Genesis is under active development. Using the latest version from their `main` branch will likely cause issues. Sticking to a tagged release like `v0.3.5` is recommended. but any version after `v0.3.5` should be mostly compatable
 -   **Parallel Environments**: Support for parallelized simulation environments is not yet implemented but may be added in the future.
 -   **Sensor Models**: Currently, no advanced sensor noise or distortion models are included. This is planned for a future release.
 -   **topic_based_ros2_control**: This external package used in gs_ros is set to be deprecated shortly, modifying the ros2_control tag in the gs_ros2_control_demos is advised. The suggested alternative of [topic_based_ros2_control](https://github.com/PickNikRobotics/topic_based_ros2_control) is [topic_based_hardware_interfaces](https://github.com/ros-controls/topic_based_hardware_interfaces). gs_ros will be migrated to use the suggested alternative in a future release

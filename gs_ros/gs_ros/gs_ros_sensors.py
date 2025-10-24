@@ -1,5 +1,4 @@
 import genesis as gs
-from genesis.sensors.raycaster.patterns import DepthCameraPattern, GridPattern, SphericalPattern
 from genesis.utils.geom import quat_to_R, euler_to_quat
 from sensor_msgs.msg import Image,PointCloud2,Imu,LaserScan
 from geometry_msgs.msg import Vector3,Quaternion
@@ -314,7 +313,7 @@ class GsRosSensors:
 
         return_points_in_world_frame = sectional_lidar_config.get("return_points_in_world_frame", False)
         try:
-            pattern_cfg = DepthCameraPattern(
+            pattern_cfg = gs.sensors.DepthCameraPattern(
                 res=resolution,
                 fx=fx,
                 fy=fy,
@@ -324,7 +323,7 @@ class GsRosSensors:
                 fov_vertical=fov_vertical,
             )
         except TypeError:
-            pattern_cfg = DepthCameraPattern(
+            pattern_cfg = gs.sensors.DepthCameraPattern(
                 Width=resolution[0],
                 Height=resolution[1],
                 fx=fx,
@@ -460,7 +459,7 @@ class GsRosSensors:
         return_points_in_world_frame=grid_lidar_config.get("return_points_in_world_frame",False)
         # if draw_points:
         
-        pattern_cfg = GridPattern(resolution=resolution,size=grid_size,direction=ray_direction_euler)
+        pattern_cfg = gs.sensors.GridPattern(resolution=resolution,size=grid_size,direction=ray_direction_euler)
         grid_lidar=self.scene.add_sensor(gs.sensors.Lidar(pattern=pattern_cfg,entity_idx=entity_idx,link_idx_local=link_idx_local,return_world_frame=return_points_in_world_frame,
                                                           pos_offset=pos_offset,euler_offset=euler_offset,min_range=near,max_range=far,draw_debug=draw_points,
                                                           debug_sphere_radius=draw_point_radius,debug_ray_start_color=ray_start_color,debug_ray_hit_color=ray_hit_color))
@@ -532,27 +531,15 @@ class GsRosSensors:
             ray_hit_color=(0.0, 0.0, 0.0, 0.0)
         return_points_in_world_frame=sectional_lidar_config.get("return_points_in_world_frame",False)
         
-        try:
-            pattern_cfg = DepthCameraPattern(
-                res=resolution,
-                fx=fx,
-                fy=fy,
-                cx=cx,
-                cy=cy,
-                fov_horizontal=fov_horizontal,
-                fov_vertical=fov_vertical,
-            )
-        except TypeError:
-            pattern_cfg = DepthCameraPattern(
-                Width=resolution[0],
-                Height=resolution[1],
-                fx=fx,
-                fy=fy,
-                cx=cx,
-                cy=cy,
-                fov_horizontal=fov_horizontal,
-                fov_vertical=fov_vertical,
-            )
+        pattern_cfg = gs.sensors.DepthCameraPattern(
+            res=resolution,
+            fx=fx,
+            fy=fy,
+            cx=cx,
+            cy=cy,
+            fov_horizontal=fov_horizontal,
+            fov_vertical=fov_vertical,
+        )
 
         sectional_lidar=self.scene.add_sensor(gs.sensors.Lidar(pattern=pattern_cfg,entity_idx=entity_idx,link_idx_local=link_idx_local,return_world_frame=return_points_in_world_frame,
                                                           pos_offset=pos_offset,euler_offset=euler_offset,min_range=near,max_range=far,draw_debug=draw_points,
@@ -621,7 +608,7 @@ class GsRosSensors:
         return_points_in_world_frame=lidar_config.get("return_points_in_world_frame",False)
         # if draw_points:
         
-        pattern_cfg = SphericalPattern(
+        pattern_cfg = gs.sensors.SphericalPattern(
             fov=fov,
             n_points=n_points,
         )
@@ -697,7 +684,7 @@ class GsRosSensors:
         return_points_in_world_frame=laser_scan_config.get("return_points_in_world_frame",False)
         # if draw_points:
         
-        pattern_cfg = SphericalPattern(
+        pattern_cfg = gs.sensors.SphericalPattern(
             fov=fov,
             n_points=n_points,
         )

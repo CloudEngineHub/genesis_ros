@@ -32,7 +32,7 @@ class GsRosBridge:
             self.all_nodes_to_spin.append(self.ros_control_node)
         else:
             self.ros_control_node=ros_node
-            
+        
         if file_path is not None:
             with open(file_path, 'r') as file:
                 self.parent_config=yaml.safe_load(file)
@@ -71,6 +71,43 @@ class GsRosBridge:
         else:
             self.scene=None
             gs.logger.warn(f"No config file path provided, please provide the path or add the scene, robots, etc as necessary")
+        KEY_DPOS = 0.1
+        KEY_DANGLE = 0.1
+
+        # Movement when no keyboard control is available
+        MOVE_RADIUS = 1.0
+        MOVE_RATE = 1.0 / 100.0
+
+        # Number of obstacles to create in a ring around the robot
+        NUM_CYLINDERS = 8
+        NUM_BOXES = 6
+        CYLINDER_RING_RADIUS = 3.0
+        BOX_RING_RADIUS = 5.0
+
+        for i in range(NUM_CYLINDERS):
+            angle = 2 * np.pi * i / NUM_CYLINDERS
+            x = CYLINDER_RING_RADIUS * np.cos(angle)
+            y = CYLINDER_RING_RADIUS * np.sin(angle)
+            self.scene.add_entity(
+                gs.morphs.Cylinder(
+                    height=1.5,
+                    radius=0.3,
+                    pos=(x, y, 0.75),
+                    fixed=True,
+                )
+            )
+
+        for i in range(NUM_BOXES):
+            angle = 2 * np.pi * i / NUM_BOXES + np.pi / 6
+            x = BOX_RING_RADIUS * np.cos(angle)
+            y = BOX_RING_RADIUS * np.sin(angle)
+            self.scene.add_entity(
+                gs.morphs.Box(
+                    size=(0.5, 0.5, 2.0 * (i + 1) / NUM_BOXES),
+                    pos=(x, y, 1.0),
+                    fixed=False,
+                )
+            )
             
     def build(self):
         self.sim.build_scene(self.parent_config["scene"])

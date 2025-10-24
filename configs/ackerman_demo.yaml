@@ -8,7 +8,7 @@ scene:
     floor_height: 0.0
     requires_grad: false
 
-  show_Viewer: true
+  show_Viewer: false
 
   profiling_options:
     show_FPS: false
@@ -166,7 +166,7 @@ robots:
     # ----------------------------
     # - name: front_cam
     #   sensor_type: cam
-    #   link: cemra_link
+    #   link: camera_link
     #   # Transform: [[  0.00,   0.00,  -1.00,   0.00],
     #   #             [ -1.00,   0.00,   0.00,   0.00],
     #   #             [  0.00,   1.00,   0.00,   0.00],
@@ -221,31 +221,31 @@ robots:
     #   QOS_reliability: RELIABLE
     #   QOS_durability: VOLATILE
 
-    - name: grid_lidar
-      sensor_type: grid_lidar
-      link: lidar_link
-      frame_id: lidar_link
-      topic: grid_lidar_topic
-      frequency: 10.0
-      near: 0.01
-      far: 30.0
-      pos_offset: [0.0, 0.0, 0]
-      euler_offset: [0.0, 0.0, 0.0]
-      resolution: 0.1
-      grid_size: [1, 1]
-      ray_direction_euler: [0, 0, 0]
-      draw_points: false
-      draw_point_radius: 0.02
-      ray_start_color: [0.5, 0.5, 1.0, 1.0]
-      ray_hit_color: [1.0, 0.5, 0.5, 1.0]
-      return_points_in_world_frame: false
-      add_noise: false
-      noise_mean: 0.0
-      noise_std: 0.0
-      QOS_history: KEEP_LAST
-      QOS_depth: 10
-      QOS_reliability: RELIABLE
-      QOS_durability: VOLATILE
+    # - name: grid_lidar
+    #   sensor_type: grid_lidar
+    #   link: lidar_link
+    #   frame_id: lidar_link
+    #   topic: grid_lidar_topic
+    #   frequency: 10.0
+    #   near: 0.01
+    #   far: 30.0
+    #   pos_offset: [0.0, 0.0, 0]
+    #   euler_offset: [0.0, 0.0, 0.0]
+    #   resolution: 0.1
+    #   grid_size: [1, 1]
+    #   ray_direction_euler: [0, 0, 0]
+    #   draw_points: false
+    #   draw_point_radius: 0.02
+    #   ray_start_color: [0.5, 0.5, 1.0, 1.0]
+    #   ray_hit_color: [1.0, 0.5, 0.5, 1.0]
+    #   return_points_in_world_frame: false
+    #   add_noise: false
+    #   noise_mean: 0.0
+    #   noise_std: 0.0
+    #   QOS_history: KEEP_LAST
+    #   QOS_depth: 10
+    #   QOS_reliability: RELIABLE
+    #   QOS_durability: VOLATILE
 
 
 
