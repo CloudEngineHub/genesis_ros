@@ -41,7 +41,7 @@ This project provides the essential tools to kickstart your robotics development
 
 ### Prerequisites
 
-1.  **ROS 2**: This package is developed for ROS 2. Ensure you have a working installation (e.g., Humble, Iron).
+1.  **ROS 2**: This package is developed for ROS 2. Ensure you have a working installation (e.g., jazzy, kilted, rolling, humble).
 2.  **Genesis Simulator**: Install Genesis by following the instructions in the official [Genesis repository](https://github.com/Genesis-Embodied-AI/Genesis.git).
     > **Note**: `gs_ros` was tested with Genesis `v0.3.5`. Newer versions may have compatibility issues. Please report any problems you encounter!
 
@@ -61,6 +61,7 @@ This project provides the essential tools to kickstart your robotics development
     git clone https://github.com/vybhav-ibr/genesis_ros.git .
     git submodule update --remote
     ```
+    > **Use the 'humble' barnch for that distro, for every-other distro is supported in the main barnch**
 
 3.  **Install Dependencies**
     Let `rosdep` handle the required dependencies.
@@ -110,7 +111,7 @@ This project provides the essential tools to kickstart your robotics development
 -   **Genesis Version**: Genesis is under active development. Using the latest version from their `main` branch will likely cause issues. Sticking to a tagged release like `v0.3.5` is recommended. but any version after `v0.3.5` should be mostly compatable
 -   **Parallel Environments**: Support for parallelized simulation environments is not yet implemented but may be added in the future.
 -   **Sensor Models**: Currently, no advanced sensor noise or distortion models are included. This is planned for a future release.
--   **topic_based_ros2_control**: This external package used in gs_ros is set to be deprecated shortly, modifying the ros2_control tag in the gs_ros2_control_demos is advised. The suggested alternative of [topic_based_ros2_control](https://github.com/PickNikRobotics/topic_based_ros2_control) is [topic_based_hardware_interfaces](https://github.com/ros-controls/topic_based_hardware_interfaces). gs_ros will be migrated to use the suggested alternative in a future release
+-   **topic_based_hardware_interfaces**: This external package is used gs_ros for integrating ros2_control with a topic based system [topic_based_hardware_interfaces](https://github.com/ros-controls/topic_based_hardware_interfaces).For the `humble` branch [topic_based_ros2_control](https://github.com/PickNikRobotics/topic_based_ros2_control.git) by picknik robotics is used as humble distro is not supported.
 
 ---
 

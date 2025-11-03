@@ -4,7 +4,7 @@ from rclpy.node import Node
 import genesis as gs
 
 def main(args=None):
-    gs.init(logging_level="debug",performance_mode=True)
+    gs.init(logging_level="info",performance_mode=True)
     rclpy.init(args=args)
 
     default_ros_node=Node('gs_ros_bridge_node')

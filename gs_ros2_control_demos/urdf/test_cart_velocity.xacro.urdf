@@ -109,7 +109,7 @@
 
   <ros2_control name="GsSimSystem" type="system">
     <hardware>
-        <plugin>topic_based_ros2_control/TopicBasedSystem</plugin>
+        <plugin>joint_state_topic_hardware_interface/JointStateTopicSystem</plugin>
         <param name="joint_commands_topic">/robot/joint_commands</param>
         <param name="joint_states_topic">/robot/joint_states</param>
     </hardware>

@@ -21,6 +21,7 @@ find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(joint_state_topic_hardware_interface REQUIRED)
 
 install(DIRECTORY
   launch
