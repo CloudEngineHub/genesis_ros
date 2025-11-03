@@ -27,7 +27,7 @@ This project provides the essential tools to kickstart your robotics development
 `gs_ros` provides out-of-the-box support for several common robotics sensors:
 
 -   📷 **Camera**: Publishes RGB, depth, semantic segmentation, and surface normal images.
--   📸 **RGBD Camera**: A convenient wrapper for synchronized RGB and depth image publishing.
+-   📸 **RGBD Camera**: A convenient wrapper for synchronized RGB and point cloud publishing.
 -   🛰️ **IMU**: Simulates an Inertial Measurement Unit.
 -   📏 **Sectional Lidar**: A ray based lidar covering a section of the space(analogus to a depth camera).
 -   🌐 **3D Lidar**: A ray based 360 degree 3D Lidar.
