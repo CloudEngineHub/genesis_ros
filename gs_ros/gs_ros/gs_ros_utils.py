@@ -9,12 +9,14 @@ from rclpy.qos import (
     QoSDurabilityPolicy,
 )
 
+
 def create_qos_profile(
     history: str = "keep_last",
     depth: int = 10,
     reliability: str = "reliable",
-    durability: str = "volatile"
+    durability: str = "volatile",
 ) -> QoSProfile:
+    """Create a ROS 2 QoSProfile from string parameters for history, reliability, and durability."""
     """
     Create a QoSProfile from string parameters.
     Allowed values (case-insensitive):
@@ -50,6 +52,7 @@ def create_qos_profile(
 
     return qos
 
+
 def quat_angle_difference(q1, q2):
     """
     Compute the angle difference (in radians) between two unit quaternions.
@@ -72,101 +75,110 @@ def quat_angle_difference(q1, q2):
     angle = 2 * np.arccos(np.abs(dot))
     return angle
 
-def get_entity(entities,idx=None,name=None):
-    if idx is None and name is None:
-        return None
-    elif idx is not None:
-        for _,entry_id,entry in entities:
-            if entry_id==idx:
-                return entry
-    elif name is not None:
-        for entry_name,_,entry in entities:
-            if entry_name==name:
-                return entry
-            
-def get_dofs_idx(robot,joint_names):
-    motor_dofs=[]
+
+def get_entity(entities_info, name=None):
+    """Retrieve an entity from a list by its unique name."""
+    if name is not None:
+        if entities_info.get(name) is not None:
+            return entities_info[name]["entity_attr"]
+
+
+def get_dofs_idx(robot, joint_names):
+    """Map a list of joint names to their corresponding local DOF indices in the robot."""
+    motor_dofs = []
     if joint_names is not None:
         for joint_name in joint_names:
-            if joint_name=="root_joint":
+            if joint_name == "root_joint":
                 continue
             for joint in robot.joints:
-                if joint.name ==joint_name:
+                if joint.name == joint_name:
                     motor_dofs.append(joint.dofs_idx_local[0])
         return motor_dofs
-    
-def get_links_idx(robot,link_names):
-    links_idx_local=[]
+
+
+def get_links_idx(robot, link_names):
+    """Map a list of link names to their corresponding local indices in the robot."""
+    links_idx_local = []
     if link_names is not None:
         for link_name in link_names:
             for link in robot.links:
-                if link.name ==link_name:
+                if link.name == link_name:
                     links_idx_local.append(link.idx_local)
         return links_idx_local
-            
-def get_current_timestamp(scene):
-    timestamp=Time()
-    timestamp.sec=int(scene.cur_t)
-    timestamp.nanosec=int((scene.cur_t-timestamp.sec)*10e8)
+
+
+def get_current_timestamp(scene, time_offset=0):
+    """Calculate the current simulation time as a ROS 2 Time message, applying an optional offset."""
+    time = scene.cur_t - time_offset
+    timestamp = Time()
+    timestamp.sec = int(time)
+    timestamp.nanosec = int((time - timestamp.sec) * 10e8)
     return timestamp
 
+
 def get_joint_names(robot):
-    joint_names=[]
-    dofs_idx_local=[]
+    """Retrieve all non-root joint names and their corresponding local DOF indices."""
+    joint_names = []
+    dofs_idx_local = []
     for joint in robot.joints:
         if "root_joint" not in joint.name:
             joint_names.append(joint.name)
             dofs_idx_local.append(joint.dofs_idx_local[0])
-    return joint_names,dofs_idx_local
+    return joint_names, dofs_idx_local
+
 
 def ros_quat_to_gs_quat(input_quat):
-    input_quat[0],input_quat[1:3]=input_quat[3],input_quat[:2]
+    input_quat[0], input_quat[1:3] = input_quat[3], input_quat[:2]
     return input_quat
+
 
 def gs_quat_to_ros_quat(input_quat):
-    input_quat[3],input_quat[:2]=input_quat[0],input_quat[1:3]
+    input_quat[3], input_quat[:2] = input_quat[0], input_quat[1:3]
     return input_quat
 
+
 def make_gs_scene(scene_config):
-    sim_config=scene_config["sim"]
-    scene=gs.Scene(
+    """Initialize a Genesis Scene object using parameters from a configuration dictionary."""
+    sim_config = scene_config["sim"]
+    scene = gs.Scene(
         sim_options=gs.options.SimOptions(
             dt=sim_config.get("dt", 1e-2),
             substeps=sim_config.get("substeps", 1),
             substeps_local=sim_config.get("substeps_local", None),
             gravity=sim_config.get("gravity", (0.0, 0.0, -9.81)),
             floor_height=sim_config.get("floor_height", 0.0),
-            requires_grad=sim_config.get("requires_grad", False)
-            ),
-        coupler_options = make_coupler_options(scene_config.get("coupler_config", None)),
-        tool_options = gs.options.ToolOptions(
+            requires_grad=sim_config.get("requires_grad", False),
+        ),
+        coupler_options=make_coupler_options(scene_config.get("coupler_config", None)),
+        tool_options=gs.options.ToolOptions(
             dt=scene_config.get("tool_config", {}).get("dt", 1e-2),
-            floor_height=scene_config.get("tool_config", {}).get("floor_height", 0)
+            floor_height=scene_config.get("tool_config", {}).get("floor_height", 0),
         ),
-        rigid_options = make_rigid_options(scene_config.get("rigid_config", None)),
-        avatar_options = make_avatar_options(scene_config.get("avatar_config", None)),
-        mpm_options = make_mpm_options(scene_config.get("mpm_config", None)),
-        sph_options = make_sph_options(scene_config.get("sph_config", None)),
-        fem_options = make_fem_options(scene_config.get("fem_config", None)),
-        sf_options = make_sf_options(scene_config.get("sf_config", None)),
-        pbd_options = make_pbd_options(scene_config.get("pbd_config", None)),
-        vis_options = make_vis_options(scene_config.get("vis_config", None)),
-        viewer_options = make_viewer_options(scene_config.get("viewer_config", None)),
-        profiling_options = gs.options.ProfilingOptions(
+        rigid_options=make_rigid_options(scene_config.get("rigid_config", None)),
+        avatar_options=make_avatar_options(scene_config.get("avatar_config", None)),
+        mpm_options=make_mpm_options(scene_config.get("mpm_config", None)),
+        sph_options=make_sph_options(scene_config.get("sph_config", None)),
+        fem_options=make_fem_options(scene_config.get("fem_config", None)),
+        sf_options=make_sf_options(scene_config.get("sf_config", None)),
+        pbd_options=make_pbd_options(scene_config.get("pbd_config", None)),
+        vis_options=make_vis_options(scene_config.get("vis_config", None)),
+        viewer_options=make_viewer_options(scene_config.get("viewer_config", None)),
+        profiling_options=gs.options.ProfilingOptions(
             show_FPS=scene_config.get("profiling_options", {}).get("show_FPS", None),
-            FPS_tracker_alpha=scene_config.get("profiling_options", {}).get("FPS_tracker_alpha", None)
+            FPS_tracker_alpha=scene_config.get("profiling_options", {}).get(
+                "FPS_tracker_alpha", 0.9
+            ),
         ),
-        renderer = make_renderer_options(scene_config.get("renderer_config", None)),
-        show_viewer = scene_config.get("show_Viewer", None)
-
-
-    )    
+        renderer=make_renderer_options(scene_config.get("renderer_config", None)),
+        show_viewer=scene_config.get("show_Viewer", None),
+    )
     return scene
+
 
 def make_rigid_options(rigid_config):
     if rigid_config is None:
         return None
-    rigid_options=gs.options.RigidOptions(
+    rigid_options = gs.options.RigidOptions(
         dt=rigid_config.get("dt", None),
         gravity=rigid_config.get("gravity", None),
         enable_collision=rigid_config.get("enable_collision", True),
@@ -175,16 +187,18 @@ def make_rigid_options(rigid_config):
         enable_adjacent_collision=rigid_config.get("enable_adjacent_collision", False),
         disable_constraint=rigid_config.get("disable_constraint", False),
         max_collision_pairs=rigid_config.get("max_collision_pairs", 300),
-        integrator=rigid_config.get("integrator", gs.integrator.approximate_implicitfast),
+        integrator=rigid_config.get(
+            "integrator", gs.integrator.approximate_implicitfast
+        ),
         IK_max_targets=rigid_config.get("IK_max_targets", 6),
-
         # batching info
         batch_links_info=rigid_config.get("batch_links_info", False),
         batch_joints_info=rigid_config.get("batch_joints_info", False),
         batch_dofs_info=rigid_config.get("batch_dofs_info", False),
-
         # constraint solver
-        constraint_solver=rigid_config.get("constraint_solver", gs.constraint_solver.Newton),
+        constraint_solver=rigid_config.get(
+            "constraint_solver", gs.constraint_solver.Newton
+        ),
         iterations=rigid_config.get("iterations", 50),
         tolerance=rigid_config.get("tolerance", 1e-8),
         ls_iterations=rigid_config.get("ls_iterations", 50),
@@ -194,28 +208,27 @@ def make_rigid_options(rigid_config):
         constraint_timeconst=rigid_config.get("constraint_timeconst", 0.01),
         use_contact_island=rigid_config.get("use_contact_island", False),
         box_box_detection=rigid_config.get("box_box_detection", False),
-
         # hibernation threshold
         use_hibernation=rigid_config.get("use_hibernation", False),
         hibernation_thresh_vel=rigid_config.get("hibernation_thresh_vel", 1e-3),
         hibernation_thresh_acc=rigid_config.get("hibernation_thresh_acc", 1e-2),
-
         # dynamic properties
         max_dynamic_constraints=rigid_config.get("max_dynamic_constraints", 8),
-
         # experimental/debug options
         enable_multi_contact=rigid_config.get("enable_multi_contact", True),
-        enable_mujoco_compatibility=rigid_config.get("enable_mujoco_compatibility", False),
-
+        enable_mujoco_compatibility=rigid_config.get(
+            "enable_mujoco_compatibility", False
+        ),
         # GJK collision detection
-        use_gjk_collision=rigid_config.get("use_gjk_collision", False)
+        use_gjk_collision=rigid_config.get("use_gjk_collision", False),
     )
     return rigid_options
+
 
 def make_avatar_options(avatar_config):
     if avatar_config is None:
         return None
-    avatar_options=gs.options.AvatarOptions(
+    avatar_options = gs.options.AvatarOptions(
         dt=avatar_config.get("dt", None),
         enable_collision=avatar_config.get("enable_collision", False),
         enable_self_collision=avatar_config.get("enable_self_collision", False),
@@ -226,10 +239,11 @@ def make_avatar_options(avatar_config):
     )
     return avatar_options
 
+
 def make_mpm_options(mpm_config):
     if mpm_config is None:
         return None
-    mpm_options=gs.options.MPMOptions(
+    mpm_options = gs.options.MPMOptions(
         dt=mpm_config.get("dt", None),
         gravity=mpm_config.get("gravity", None),
         particle_size=mpm_config.get("particle_size", None),
@@ -242,10 +256,11 @@ def make_mpm_options(mpm_config):
     )
     return mpm_options
 
+
 def make_sph_options(sph_config):
     if sph_config is None:
         return None
-    sph_options=gs.options.SPHOptions(
+    sph_options = gs.options.SPHOptions(
         dt=sph_config.get("dt", None),
         gravity=sph_config.get("gravity", None),
         particle_size=sph_config.get("particle_size", 0.02),
@@ -256,22 +271,35 @@ def make_sph_options(sph_config):
         hash_grid_cell_size=sph_config.get("hash_grid_cell_size", None),
         max_divergence_error=sph_config.get("max_divergence_error", 0.1),
         max_density_error_percent=sph_config.get("max_density_error_percent", 0.05),
-        max_divergence_solver_iterations=sph_config.get("max_divergence_solver_iterations", 100),
-        max_density_solver_iterations=sph_config.get("max_density_solver_iterations", 100),
+        max_divergence_solver_iterations=sph_config.get(
+            "max_divergence_solver_iterations", 100
+        ),
+        max_density_solver_iterations=sph_config.get(
+            "max_density_solver_iterations", 100
+        ),
     )
     return sph_options
+
 
 def make_pbd_options(pbd_config):
     if pbd_config is None:
         return None
-    pbd_options=gs.options.PBDOptions(
+    pbd_options = gs.options.PBDOptions(
         dt=pbd_config.get("dt", None),
         gravity=pbd_config.get("gravity", None),
-        max_stretch_solver_iterations=pbd_config.get("max_stretch_solver_iterations", 4),
-        max_bending_solver_iterations=pbd_config.get("max_bending_solver_iterations", 1),
+        max_stretch_solver_iterations=pbd_config.get(
+            "max_stretch_solver_iterations", 4
+        ),
+        max_bending_solver_iterations=pbd_config.get(
+            "max_bending_solver_iterations", 1
+        ),
         max_volume_solver_iterations=pbd_config.get("max_volume_solver_iterations", 1),
-        max_density_solver_iterations=pbd_config.get("max_density_solver_iterations", 1),
-        max_viscosity_solver_iterations=pbd_config.get("max_viscosity_solver_iterations", 1),
+        max_density_solver_iterations=pbd_config.get(
+            "max_density_solver_iterations", 1
+        ),
+        max_viscosity_solver_iterations=pbd_config.get(
+            "max_viscosity_solver_iterations", 1
+        ),
         particle_size=pbd_config.get("particle_size", 1e-2),
         hash_grid_res=pbd_config.get("hash_grid_res", None),
         hash_grid_cell_size=pbd_config.get("hash_grid_cell_size", None),
@@ -280,10 +308,11 @@ def make_pbd_options(pbd_config):
     )
     return pbd_options
 
+
 def make_fem_options(fem_config):
     if fem_config is None:
         return None
-    fem_options=gs.options.FEMOptions(
+    fem_options = gs.options.FEMOptions(
         dt=fem_config.get("dt", None),
         gravity=fem_config.get("gravity", None),
         damping=fem_config.get("damping", 0.0),
@@ -301,10 +330,11 @@ def make_fem_options(fem_config):
     )
     return fem_options
 
+
 def make_sf_options(sf_config):
     if sf_config is None:
         return None
-    sf_options=gs.options.SFOptions(
+    sf_options = gs.options.SFOptions(
         dt=sf_config.get("dt", None),
         res=sf_config.get("res", 128),
         solver_iters=sf_config.get("solver_iters", 500),
@@ -318,10 +348,11 @@ def make_sf_options(sf_config):
     )
     return sf_options
 
+
 def make_viewer_options(viewer_config):
     if viewer_config is None:
         return None
-    viewer_options=gs.options.ViewerOptions(
+    viewer_options = gs.options.ViewerOptions(
         res=viewer_config.get("res", None),
         run_in_thread=viewer_config.get("run_in_thread", None),
         refresh_rate=viewer_config.get("refresh_rate", 60),
@@ -330,14 +361,15 @@ def make_viewer_options(viewer_config):
         camera_lookat=viewer_config.get("camera_lookat", (0.0, 0.0, 0.5)),
         camera_up=viewer_config.get("camera_up", (0.0, 0.0, 1.0)),
         camera_fov=viewer_config.get("camera_fov", 40),
-        enable_interaction=viewer_config.get("enable_interaction", False)
+        enable_interaction=viewer_config.get("enable_interaction", False),
     )
     return viewer_options
+
 
 def make_vis_options(vis_config):
     if vis_config is None:
         return None
-    vis_options=gs.options.VisOptions(
+    vis_options = gs.options.VisOptions(
         show_world_frame=vis_config.get("show_world_frame", True),
         world_frame_size=vis_config.get("world_frame_size", 1.0),
         show_link_frame=vis_config.get("show_link_frame", False),
@@ -358,19 +390,27 @@ def make_vis_options(vis_config):
         n_support_neighbors=vis_config.get("n_support_neighbors", 12),
         n_rendered_envs=vis_config.get("n_rendered_envs", None),
         rendered_envs_idx=vis_config.get("rendered_envs_idx", None),
-        lights=vis_config.get("lights", [
-            {"type": "directional", "dir": (-1, -1, -1), "color": (1.0, 1.0, 1.0), "intensity": 5.0}
-        ])
+        lights=vis_config.get(
+            "lights",
+            [
+                {
+                    "type": "directional",
+                    "dir": (-1, -1, -1),
+                    "color": (1.0, 1.0, 1.0),
+                    "intensity": 5.0,
+                }
+            ],
+        ),
     )
     return vis_options
-    
-    
+
+
 def make_coupler_options(coupler_config):
     if coupler_config is None:
         return None
-    if coupler_config["type"]=="legacy":
-        legacy_coupler_config=coupler_config["legacy"]
-        coupler_options=gs.options.LegacyCouplerOptions(
+    if coupler_config["type"] == "legacy":
+        legacy_coupler_config = coupler_config["legacy"]
+        coupler_options = gs.options.LegacyCouplerOptions(
             rigid_mpm=legacy_coupler_config.get("rigid_mpm", True),
             rigid_sph=legacy_coupler_config.get("rigid_sph", True),
             rigid_pbd=legacy_coupler_config.get("rigid_pbd", True),
@@ -378,15 +418,17 @@ def make_coupler_options(coupler_config):
             mpm_sph=legacy_coupler_config.get("mpm_sph", True),
             mpm_pbd=legacy_coupler_config.get("mpm_pbd", True),
             fem_mpm=legacy_coupler_config.get("fem_mpm", True),
-            fem_sph=legacy_coupler_config.get("fem_sph", True)
-            )
+            fem_sph=legacy_coupler_config.get("fem_sph", True),
+        )
         return coupler_options
-    elif coupler_config["type"]=="sap":
-        sap_coupler_config=coupler_config["sap"]
-        coupler_options=gs.options.SAPCouplerOptions(
+    elif coupler_config["type"] == "sap":
+        sap_coupler_config = coupler_config["sap"]
+        coupler_options = gs.options.SAPCouplerOptions(
             n_sap_iterations=sap_coupler_config.get("n_sap_iterations", 5),
             n_pcg_iterations=sap_coupler_config.get("n_pcg_iterations", 100),
-            n_linesearch_iterations=sap_coupler_config.get("n_linesearch_iterations", 10),
+            n_linesearch_iterations=sap_coupler_config.get(
+                "n_linesearch_iterations", 10
+            ),
             sap_convergence_atol=sap_coupler_config.get("sap_convergence_atol", 1e-6),
             sap_convergence_rtol=sap_coupler_config.get("sap_convergence_rtol", 1e-5),
             sap_taud=sap_coupler_config.get("sap_taud", 0.1),
@@ -394,16 +436,23 @@ def make_coupler_options(coupler_config):
             sap_sigma=sap_coupler_config.get("sap_sigma", 1e-3),
             pcg_threshold=sap_coupler_config.get("pcg_threshold", 1e-6),
             linesearch_ftol=sap_coupler_config.get("linesearch_ftol", 1e-6),
-            linesearch_max_step_size=sap_coupler_config.get("linesearch_max_step_size", 1.5),
-            hydroelastic_stiffness=sap_coupler_config.get("hydroelastic_stiffness", 1e8),
-            point_contact_stiffness=sap_coupler_config.get("point_contact_stiffness", 1e8),
+            linesearch_max_step_size=sap_coupler_config.get(
+                "linesearch_max_step_size", 1.5
+            ),
+            hydroelastic_stiffness=sap_coupler_config.get(
+                "hydroelastic_stiffness", 1e8
+            ),
+            point_contact_stiffness=sap_coupler_config.get(
+                "point_contact_stiffness", 1e8
+            ),
             fem_floor_type=sap_coupler_config.get("fem_floor_type", "tet"),
-            fem_self_tet=sap_coupler_config.get("fem_self_tet", True)
-            )
+            fem_self_tet=sap_coupler_config.get("fem_self_tet", True),
+        )
         return coupler_options
     else:
         return None
-    
+
+
 def make_renderer_options(renderer_config):
     if renderer_config is None:
         return gs.renderers.Rasterizer()
@@ -422,168 +471,325 @@ def make_renderer_options(renderer_config):
             env_quat=renderer_config.get("env_quat", None),
             lights=renderer_config.get(
                 "lights",
-                [{"pos": (0.0, 0.0, 10.0), "color": (1.0, 1.0, 1.0), "intensity": 10.0, "radius": 4.0}]
+                [
+                    {
+                        "pos": (0.0, 0.0, 10.0),
+                        "color": (1.0, 1.0, 1.0),
+                        "intensity": 10.0,
+                        "radius": 4.0,
+                    }
+                ],
             ),
             normal_diff_clamp=renderer_config.get("normal_diff_clamp", 180),
         )
         return raytracer_options
-    
+
+
+def make_terrain(terrain_config):
+    if terrain_config is None:
+        return None
+    type = terrain_config.get("world_type", None)
+    if type == "plane":
+        return gs.morphs.Plane(
+            pos=terrain_config.get("pos", (0.0, 0.0, 0.0)),
+            euler=terrain_config.get("euler", (0.0, 0.0, 0.0)),
+            quat=terrain_config.get("quat", None),
+            normal=terrain_config.get("normal", (0, 0, 1)),
+            visualization=terrain_config.get("visualization", True),
+            collision=terrain_config.get("collision", True),
+            fixed=terrain_config.get("fixed", True),
+            batch_fixed_verts=terrain_config.get("batch_fixed_verts", False),
+            contype=terrain_config.get("contype", 0xFFFF),
+            conaffinity=terrain_config.get("conaffinity", 0xFFFF),
+            plane_size=terrain_config.get("plane_size", (1e3, 1e3)),
+            tile_size=terrain_config.get("tile_size", (1, 1)),
+        )
+    elif type == "terrain":
+        return gs.morphs.Terrain(
+            file=terrain_config.get("file", ""),
+            scale=terrain_config.get(
+                "scale", 1.0
+            ),  # Can also be a tuple, but defaults to 1.0 for uniform scaling
+            pos=terrain_config.get("pos", (0.0, 0.0, 0.0)),
+            visualization=terrain_config.get("visualization", True),
+            collision=terrain_config.get("collision", True),
+            randomize=terrain_config.get("randomize", False),
+            n_subterrains=terrain_config.get("n_subterrains", (3, 3)),
+            subterrain_size=terrain_config.get("subterrain_size", (12.0, 12.0)),
+            horizontal_scale=terrain_config.get("horizontal_scale", 0.25),
+            vertical_scale=terrain_config.get("vertical_scale", 0.005),
+            uv_scale=terrain_config.get("uv_scale", 1.0),
+            subterrain_types=terrain_config.get(
+                "subterrain_types", "flat_terrain"
+            ),  # Default type for subterrain if not specified
+            height_field=terrain_config.get("height_field", None),
+            name=terrain_config.get("name", None),
+            subterrain_parameters=terrain_config.get("subterrain_parameters", {}),
+            batch_fixed_verts=terrain_config.get("batch_fixed_verts", False),
+        )
+    else:
+        return gs.morphs.Plane()
+
+
+def calculate_bounds(morph_type, morph):
+    if morph_type == "plane":
+        pos = morph.pos
+        half_length, half_width = morph.plane_size[0] / 2.0, morph.plane_size[1] / 2.0
+        min_x, max_x = pos[0] - half_width, pos[0] + half_width
+        min_y, max_y = pos[1] - half_length, pos[1] + half_length
+        return [
+            range(int(min_x), int(max_x)),
+            range(int(min_y), int(max_y)),
+            range(int(pos[2]), 100),
+        ]
+    elif morph_type == "terrain":
+        pos = morph.pos
+        n_subterrains = morph.n_subterrains
+        subterrain_size = morph.subterrain_size
+        width, height = (
+            n_subterrains[0] * subterrain_size[0],
+            n_subterrains[1] * subterrain_size[1],
+        )
+        half_width, half_height = width / 2.0, height / 2.0
+        min_x, max_x = pos[0] - half_width, pos[0] + half_width
+        min_y, max_y = pos[1] - half_height, pos[1] + half_height
+
+        return [
+            range(int(min_x), int(max_x)),
+            range(int(min_y), int(max_y)),
+            range(int(pos[2]), 100),
+        ]
+
+
 def make_morph(morph_config):
+    """Create a Genesis Morph object (URDF, MJCF, Mesh, etc.) from a configuration dictionary."""
     if morph_config is None:
         return None
-    entity_path=morph_config["path"]
-    morph_type=morph_config.get("type", None)
-    if morph_type=="drone":
-        morph=gs.mprphs.Drone(
-            file = morph_config.get("file"),
-            scale = morph_config.get("scale", 1.0),
-            pos = morph_config.get("pos", (0.0, 0.0, 0.0)),
-            euler = morph_config.get("euler", (0.0, 0.0, 0.0)),
-            quat = morph_config.get("quat"),
-            decimate = morph_config.get("decimate", True),
-            decimate_face_num = morph_config.get("decimate_face_num", 500),
-            decimate_aggressiveness = morph_config.get("decimate_aggressiveness", 5),
-            convexify = morph_config.get("convexify", True),
-            decompose_nonconvex = morph_config.get("decompose_nonconvex", False),
-            decompose_object_error_threshold = morph_config.get("decompose_object_error_threshold", 0.15),
-            decompose_robot_error_threshold = morph_config.get("decompose_robot_error_threshold", float("inf")),
-            coacd_options = morph_config.get("coacd_options"),
-            visualization = morph_config.get("visualization", True),
-            collision = morph_config.get("collision", True),
-            prioritize_urdf_material = morph_config.get("prioritize_urdf_material", False),
-            model = morph_config.get("model", "CF2X"),
-            COM_link_name = morph_config.get("COM_link_name"),
-            propellers_link_names = morph_config.get("propellers_link_names"),
-            propellers_link_name = morph_config.get("propellers_link_name", ("prop0_link", "prop1_link", "prop2_link", "prop3_link")),
-            propellers_spin = morph_config.get("propellers_spin", (-1, 1, -1, 1)),
-            merge_fixed_links = morph_config.get("merge_fixed_links", True),
-            links_to_keep = morph_config.get("links_to_keep", []),
-            default_armature = morph_config.get("default_armature", 0.1),
-            default_base_ang_damping_scale = morph_config.get("default_base_ang_damping_scale", 1e-5)
+    entity_path = morph_config.get("path", "")
+    morph_type = morph_config.get("type", None)
+    if morph_type == "drone":
+        return gs.morphs.Drone(
+            file=morph_config.get("file"),
+            scale=morph_config.get("scale", 1.0),
+            pos=morph_config.get("pos", (0.0, 0.0, 0.0)),
+            euler=morph_config.get("euler", (0.0, 0.0, 0.0)),
+            quat=morph_config.get("quat"),
+            decimate=morph_config.get("decimate", True),
+            decimate_face_num=morph_config.get("decimate_face_num", 500),
+            decimate_aggressiveness=morph_config.get("decimate_aggressiveness", 5),
+            convexify=morph_config.get("convexify", True),
+            decompose_nonconvex=morph_config.get("decompose_nonconvex", False),
+            decompose_object_error_threshold=morph_config.get(
+                "decompose_object_error_threshold", 0.15
+            ),
+            decompose_robot_error_threshold=morph_config.get(
+                "decompose_robot_error_threshold", float("inf")
+            ),
+            coacd_options=morph_config.get("coacd_options"),
+            visualization=morph_config.get("visualization", True),
+            collision=morph_config.get("collision", True),
+            prioritize_urdf_material=morph_config.get(
+                "prioritize_urdf_material", False
+            ),
+            model=morph_config.get("model", "CF2X"),
+            COM_link_name=morph_config.get("COM_link_name"),
+            propellers_link_names=morph_config.get("propellers_link_names"),
+            propellers_link_name=morph_config.get(
+                "propellers_link_name",
+                ("prop0_link", "prop1_link", "prop2_link", "prop3_link"),
+            ),
+            propellers_spin=morph_config.get("propellers_spin", (-1, 1, -1, 1)),
+            merge_fixed_links=morph_config.get("merge_fixed_links", True),
+            links_to_keep=morph_config.get("links_to_keep", []),
+            default_armature=morph_config.get("default_armature", 0.1),
+            default_base_ang_damping_scale=morph_config.get(
+                "default_base_ang_damping_scale", 1e-5
+            ),
         )
-    elif morph_type=="URDF" or entity_path.lower().endswith(".urdf"):
-        morph=gs.morphs.URDF(file=entity_path,
-                        pos=morph_config.get("pos", (0.0, 0.0, 0.0)),
-                        euler=morph_config.get("euler", (0.0, 0.0, 0.0)),
-                        quat=morph_config.get("quat", None),
-                        visualization=morph_config.get("visualization", True),
-                        collision=morph_config.get("collision", True),
-                        requires_jac_and_IK=morph_config.get("requires_jac_and_IK", True),
-                        scale=morph_config.get("scale", 1.0),
-                        convexify=morph_config.get("convexify", None),
-                        recompute_inertia=morph_config.get("recompute_inertia", False),
-                        fixed=morph_config.get("fixed", False),
-                        prioritize_urdf_material=morph_config.get("prioritize_urdf_material", False),
-                        merge_fixed_links=morph_config.get("merge_fixed_links", True),
-                        links_to_keep=morph_config.get("links_to_keep", [])
-                        )
-    elif morph_type=="MJCF" or entity_path.lower().endswith(".xml"):
-        morph=gs.morphs.MJCF(file=entity_path,
-                        pos = morph_config.get("pos", None),
-                        euler = morph_config.get("euler", None),
-                        quat = morph_config.get("quat", None),
-                        visualization = morph_config.get("visualization", True),
-                        collision = morph_config.get("collision", True),
-                        requires_jac_and_IK = morph_config.get("requires_jac_and_IK", True),
-                        scale = morph_config.get("scale", 1.0),
-                        convexify = morph_config.get("convexify", None),
-                        recompute_inertia = morph_config.get("recompute_inertia", False)
-                        )
+    elif morph_type == "URDF" or entity_path.lower().endswith(".urdf"):
+        return gs.morphs.URDF(
+            file=entity_path,
+            pos=morph_config.get("pos", (0.0, 0.0, 0.0)),
+            euler=morph_config.get("euler", (0.0, 0.0, 0.0)),
+            quat=morph_config.get("quat", None),
+            visualization=morph_config.get("visualization", True),
+            collision=morph_config.get("collision", True),
+            requires_jac_and_IK=morph_config.get("requires_jac_and_IK", True),
+            scale=morph_config.get("scale", 1.0),
+            convexify=morph_config.get("convexify", None),
+            recompute_inertia=morph_config.get("recompute_inertia", False),
+            fixed=morph_config.get("fixed", False),
+            prioritize_urdf_material=morph_config.get(
+                "prioritize_urdf_material", False
+            ),
+            merge_fixed_links=morph_config.get("merge_fixed_links", True),
+            links_to_keep=morph_config.get("links_to_keep", []),
+        )
+    elif morph_type == "MJCF" or entity_path.lower().endswith(".xml"):
+        return gs.morphs.MJCF(
+            file=entity_path,
+            pos=morph_config.get("pos", None),
+            euler=morph_config.get("euler", None),
+            quat=morph_config.get("quat", None),
+            visualization=morph_config.get("visualization", True),
+            collision=morph_config.get("collision", True),
+            requires_jac_and_IK=morph_config.get("requires_jac_and_IK", True),
+            scale=morph_config.get("scale", 1.0),
+            convexify=morph_config.get("convexify", None),
+            recompute_inertia=morph_config.get("recompute_inertia", False),
+        )
     else:
-        morph=gs.morphs.Mesh(file=entity_path,
-                        pos = morph_config.get("pos", (0.0, 0.0, 0.0)),
-                        euler = morph_config.get("euler", (0.0, 0.0, 0.0)),
-                        quat = morph_config.get("quat", None),
-                        visualization = morph_config.get("visualization", True),
-                        collision = morph_config.get("collision", True),
-                        requires_jac_and_IK = morph_config.get("requires_jac_and_IK", False),
-                        scale = morph_config.get("scale", 1.0),
-                        convexify = morph_config.get("convexify", None),
-                        recompute_inertia = morph_config.get("recompute_inertia", False),
-                        parse_glb_with_trimesh = morph_config.get("parse_glb_with_trimesh", False),
-                        fixed = morph_config.get("fixed", False),
-                        group_by_material = morph_config.get("group_by_material", True),
-                        merge_submeshes_for_collision = morph_config.get("merge_submeshes_for_collision", True),
-                        decimate = morph_config.get("decimate", True),
-                        decimate_face_num = morph_config.get("decimate_face_num", 500),
-                        decompose_nonconvex = morph_config.get("decompose_nonconvex", None),
-                        coacd_options = morph_config.get("coacd_options", None),
-                        order = morph_config.get("order", 1),
-                        mindihedral = morph_config.get("mindihedral", 10),
-                        minratio = morph_config.get("minratio", 1.1),
-                        nobisect = morph_config.get("nobisect", True),
-                        quality = morph_config.get("quality", True),
-                        verbose = morph_config.get("verbose", 0),
-                        force_retet = morph_config.get("force_retet", False)
-                        )
+        morph = gs.morphs.Mesh(
+            file=entity_path,
+            pos=morph_config.get("pos", (0.0, 0.0, 0.0)),
+            euler=morph_config.get("euler", (0.0, 0.0, 0.0)),
+            quat=morph_config.get("quat", None),
+            visualization=morph_config.get("visualization", True),
+            collision=morph_config.get("collision", True),
+            requires_jac_and_IK=morph_config.get("requires_jac_and_IK", False),
+            scale=morph_config.get("scale", 1.0),
+            convexify=morph_config.get("convexify", None),
+            recompute_inertia=morph_config.get("recompute_inertia", False),
+            parse_glb_with_trimesh=morph_config.get("parse_glb_with_trimesh", False),
+            fixed=morph_config.get("fixed", False),
+            group_by_material=morph_config.get("group_by_material", True),
+            merge_submeshes_for_collision=morph_config.get(
+                "merge_submeshes_for_collision", True
+            ),
+            decimate=morph_config.get("decimate", True),
+            decimate_face_num=morph_config.get("decimate_face_num", 500),
+            decompose_nonconvex=morph_config.get("decompose_nonconvex", None),
+            coacd_options=morph_config.get("coacd_options", None),
+            order=morph_config.get("order", 1),
+            mindihedral=morph_config.get("mindihedral", 10),
+            minratio=morph_config.get("minratio", 1.1),
+            nobisect=morph_config.get("nobisect", True),
+            quality=morph_config.get("quality", True),
+            verbose=morph_config.get("verbose", 0),
+            force_retet=morph_config.get("force_retet", False),
+        )
     return morph
 
+
+def make_primitive(morph_type, morph_config):
+    if morph_type == "box":
+        return gs.morphs.Box(
+            pos=morph_config.get("pos", None),
+            euler=morph_config.get("euler", None),
+            quat=morph_config.get("quat", None),
+            size=morph_config.get("size", None),
+            lower=morph_config.get("lower", None),
+            upper=morph_config.get("upper", None),
+            visualization=morph_config.get("visualization", True),
+            collision=morph_config.get("collision", True),
+            requires_jac_and_IK=morph_config.get("requires_jac_and_IK", True),
+            fixed=morph_config.get("fixed", False),
+            batch_fixed_verts=morph_config.get("batch_fixed_verts", True),
+            contype=morph_config.get("contype", 0xFFFF),
+            conaffinity=morph_config.get("conaffinity", 0xFFFF),
+        )
+    elif morph_type == "sphere":
+        return gs.morphs.Sphere(
+            pos=morph_config.get("pos", None),
+            euler=morph_config.get("euler", None),
+            quat=morph_config.get("quat", None),
+            radius=morph_config.get("radius", 0.5),
+            visualization=morph_config.get("visualization", True),
+            collision=morph_config.get("collision", True),
+            requires_jac_and_IK=requires_jac_and_IK,
+            fixed=fixed,
+            batch_fixed_verts=morph_config.get("batch_fixed_verts", True),
+            contype=morph_config.get("contype", 0xFFFF),
+            conaffinity=morph_config.get("conaffinity", 0xFFFF),
+        )
+    elif morph_type == "cylinder":
+        return gs.morphs.Cylinder(
+            pos=morph_config.get("pos", None),
+            euler=morph_config.get("euler", None),
+            quat=morph_config.get("quat", None),
+            height=morph_config.get("height", 1.0),
+            radius=morph_config.get("radius", 0.5),
+            visualization=morph_config.get("visualization", True),
+            collision=morph_config.get("collision", True),
+            requires_jac_and_IK=morph_config.get("requires_jac_and_IK", True),
+            fixed=morph_config.get("fixed", False),
+            batch_fixed_verts=morph_config.get("batch_fixed_verts", True),
+            contype=morph_config.get("contype", 0xFFFF),
+            conaffinity=morph_config.get("conaffinity", 0xFFFF),
+        )
+    else:
+        gs.logger.critical("Unsupported primitve type")
+
+
 def make_material(material_config):
-    #TODO: add more materials
+    # TODO: add more materials
     if material_config is None:
         return None
-    if material_config["type"].lower() =="rigid":
-        material=gs.materials.Rigid(
-            rho = material_config.get("rho", 200.0),
-            friction = material_config.get("friction", None),
-            needs_coup = material_config.get("needs_coup", True),
-            coup_friction = material_config.get("coup_friction", 0.1),
-            coup_softness = material_config.get("coup_softness", 0.002),
-            coup_restitution = material_config.get("coup_restitution", 0.0),
-            sdf_cell_size = material_config.get("sdf_cell_size", 0.005),
-            sdf_min_res = material_config.get("sdf_min_res", 32),
-            sdf_max_res = material_config.get("sdf_max_res", 128),
-            gravity_compensation = material_config.get("gravity_compensation", 0)
-            )
-    elif material_config["type"].lower() =="fem.muscle":
-        material=gs.materials.FEM.Muscle(  # to allow setting group
-            E=float(material_config.get("E", 1e6)),
-            nu=material_config.get("nu", 0.2),
-            rho=material_config.get("rho", 1000.0),
-            model=material_config.get("model", "neohooken"),
-        ),
-    elif material_config["type"].lower() =="hybrid":
-        material_rigid=make_material(material_config.get("material_rigid", None))
-        material_soft=make_material(material_config.get("material_soft", None))
-        material=gs.materials.Hybrid(
+    if material_config["type"].lower() == "rigid":
+        material = gs.materials.Rigid(
+            rho=material_config.get("rho", 200.0),
+            friction=material_config.get("friction", None),
+            needs_coup=material_config.get("needs_coup", True),
+            coup_friction=material_config.get("coup_friction", 0.1),
+            coup_softness=material_config.get("coup_softness", 0.002),
+            coup_restitution=material_config.get("coup_restitution", 0.0),
+            sdf_cell_size=material_config.get("sdf_cell_size", 0.005),
+            sdf_min_res=material_config.get("sdf_min_res", 32),
+            sdf_max_res=material_config.get("sdf_max_res", 128),
+            gravity_compensation=material_config.get("gravity_compensation", 0),
+        )
+    elif material_config["type"].lower() == "fem.muscle":
+        material = (
+            gs.materials.FEM.Muscle(  # to allow setting group
+                E=float(material_config.get("E", 1e6)),
+                nu=material_config.get("nu", 0.2),
+                rho=material_config.get("rho", 1000.0),
+                model=material_config.get("model", "neohooken"),
+            ),
+        )
+    elif material_config["type"].lower() == "hybrid":
+        material_rigid = make_material(material_config.get("material_rigid", None))
+        material_soft = make_material(material_config.get("material_soft", None))
+        material = gs.materials.Hybrid(
             material_rigid=material_rigid,
             material_soft=material_soft,
-            fixed=material_config.get('fixed', False),
-            use_default_coupling=material_config.get('use_default_coupling', False),
-            damping=material_config.get('damping', 0.0),
-            thickness=material_config.get('thickness', 0.05),
-            soft_dv_coef=material_config.get('soft_dv_coef', 0.01),
+            fixed=material_config.get("fixed", False),
+            use_default_coupling=material_config.get("use_default_coupling", False),
+            damping=material_config.get("damping", 0.0),
+            thickness=material_config.get("thickness", 0.05),
+            soft_dv_coef=material_config.get("soft_dv_coef", 0.01),
             func_instantiate_rigid_from_soft=None,
             func_instantiate_soft_from_rigid=None,
             func_instantiate_rigid_soft_association=None,
         )
     return material
-        
+
+
 def make_surface(surface_config):
     if surface_config is None:
         return None
-    surface=gs.surfaces.Default(
-                    color = surface_config.get("color", None),
-                    opacity = surface_config.get("opacity", None),
-                    roughness = surface_config.get("roughness", None),
-                    metallic = surface_config.get("metallic", None),
-                    emissive = surface_config.get("emissive", None),
-                    ior = surface_config.get("ior", None),
-                    opacity_texture = surface_config.get("opacity_texture", None),
-                    roughness_texture = surface_config.get("roughness_texture", None),
-                    metallic_texture = surface_config.get("metallic_texture", None),
-                    normal_texture = surface_config.get("normal_texture", None),
-                    emissive_texture = surface_config.get("emissive_texture", None),
-                    default_roughness = surface_config.get("default_roughness", 1.0),
-                    vis_mode = surface_config.get("vis_mode", None),
-                    smooth = surface_config.get("smooth", True),
-                    double_sided = surface_config.get("double_sided", None),
-                    normal_diff_clamp = surface_config.get("normal_diff_clamp", 180),
-                    recon_backend = surface_config.get("recon_backend", 'splashsurf'),
-                    generate_foam = surface_config.get("generate_foam", False),
-                    foam_options = surface_config.get("foam_options", None),
-                    diffuse_texture = surface_config.get("diffuse_texture", None),
-                    specular_trans = surface_config.get("specular_trans", 0.0),
-                    diffuse_trans = surface_config.get("diffuse_trans", 0.0)
-                    )
+    surface = gs.surfaces.Default(
+        color=surface_config.get("color", None),
+        opacity=surface_config.get("opacity", None),
+        roughness=surface_config.get("roughness", None),
+        metallic=surface_config.get("metallic", None),
+        emissive=surface_config.get("emissive", None),
+        ior=surface_config.get("ior", None),
+        opacity_texture=surface_config.get("opacity_texture", None),
+        roughness_texture=surface_config.get("roughness_texture", None),
+        metallic_texture=surface_config.get("metallic_texture", None),
+        normal_texture=surface_config.get("normal_texture", None),
+        emissive_texture=surface_config.get("emissive_texture", None),
+        default_roughness=surface_config.get("default_roughness", 1.0),
+        vis_mode=surface_config.get("vis_mode", None),
+        smooth=surface_config.get("smooth", True),
+        double_sided=surface_config.get("double_sided", None),
+        normal_diff_clamp=surface_config.get("normal_diff_clamp", 180),
+        recon_backend=surface_config.get("recon_backend", "splashsurf"),
+        generate_foam=surface_config.get("generate_foam", False),
+        foam_options=surface_config.get("foam_options", None),
+        diffuse_texture=surface_config.get("diffuse_texture", None),
+        specular_trans=surface_config.get("specular_trans", 0.0),
+        diffuse_trans=surface_config.get("diffuse_trans", 0.0),
+    )
     return surface

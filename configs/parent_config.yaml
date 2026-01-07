@@ -77,7 +77,6 @@ scene:
     ls_tolerance: 0.01
     sparse_solve: false
     contact_resolve_time: null
-    # constraint_timeconst: 
     use_contact_island: false
     box_box_detection: false
     use_hibernation: false
@@ -213,73 +212,120 @@ scene:
 
 world:
   plane: true
-  # generated: 
-  #   pos: [0.0, 0.0, 0.0]
-  #   euler: [0.0, 0.0, 0.0]
-  #   quat: null
-  #   visualization: true
-  #   collision: true
-  #   requires_jac_and_IK: false
-  #   randomize: false
-  #   n_subterrains: [3, 3]
-  #   subterrain_size: [12.0, 12.0]
-  #   horizontal_scale: 0.25
-  #   vertical_scale: 0.005
-  #   subterrain_types:
-  #     - [flat_terrain  , random_uniform_terrain, stepping_stones_terrain]
-  #     - [pyramid_sloped_terrain   , discrete_obstacles_terrain, wave_terrain]
-  #     - [random_uniform_terrain   , pyramid_stairs_terrain, sloped_terrain]
-  #   height_field: null
+  generated: 
+    pos: [0.0, 0.0, 0.0]
+    euler: [0.0, 0.0, 0.0]
+    quat: null
+    visualization: true
+    collision: true
+    requires_jac_and_IK: false
+    randomize: false
+    n_subterrains: [3, 3]
+    subterrain_size: [12.0, 12.0]
+    horizontal_scale: 0.25
+    vertical_scale: 0.005
+    subterrain_types:
+      - [flat_terrain  , random_uniform_terrain, stepping_stones_terrain]
+      - [pyramid_sloped_terrain   , discrete_obstacles_terrain, wave_terrain]
+      - [random_uniform_terrain   , pyramid_stairs_terrain, sloped_terrain]
+    height_field: null
 
 objects:
-  # object_one:
-  #   name: object_one
-  #   morph:
-  #     path: "/home/vybhav/Desktop/newest_genesis/box.urdf"
-  #     pos: [5.0, 0.0, 0.0]
-  #     euler: [0.0, 0.0, 0.0]
-  #     fixed: true
+  box:
+    morph:
+      type: box
+      pos: [0.0, 0.0, 0.5]
+      euler: [0.0, 0.0, 0.0]
+      size: [1.0, 1.0, 1.0]
+      visualization: true
+      collision: true
+      fixed: false
+    material:
+      type: rigid
+      rho: 1000.0
+      friction: 0.5
+
+  # A sphere floating above
+  sphere:
+    morph:
+      type: sphere
+      pos: [2.0, 0.0, 2.0]
+      radius: 0.5
+      visualization: true
+      collision: true
+      fixed: false
+    material:
+      type: rigid
+      rho: 500.0
+      friction: 0.3
+
+  # A cylinder lying on its side
+  cylinder:
+    morph:
+      type: cylinder
+      pos: [-2.0, 0.0, 0.5]
+      euler: [0.0, 90.0, 0.0]  # Rotate to lie on side
+      height: 2.0
+      radius: 0.3
+      visualization: true
+      collision: true
+      fixed: false
+    material:
+      type: rigid
+      rho: 800.0
+
+  object_one:
+    name: object_one
+    morph:
+      path: "../../box.urdf"
+      pos: [5.0, 0.0, 0.0]
+      euler: [0.0, 0.0, 0.0]
+      fixed: true
 
 robots:
   robot_one:
     visualize_contact: true
     namespace: "robot"
-    control_topic: control
-    joint_state_target_topic: joint_commands
-    joint_state_target_topic_frequency: 50
-    joint_properties: # the joints should be in alphabetical order
-      left_wheel_steering_joint:
-        kp: 30
-        kv: 30
-        # stiffness: 10.0
-        # damping: 5.0
-        # armature: 0.0
-        # force_range: [-1000.0, 1000.0]
-        command: position
-      rear_left_wheel_joint:
-        kp: 50
-        kv: 50
-        # stiffness: 10.0
-        # damping: 5.0
-        # armature: 0.0
-        # force_range: [-1000.0, 1000.0]
-        command: velocity
-      rear_right_wheel_joint:
-        kp: 50
-        kv: 50
-        # stiffness: 10.0
-        # damping: 50.0
-        # armature: 0.0
-        # force_range: [-1000.0, 1000.0]
-        command: velocity
-      right_wheel_steering_joint:
-        kp: 30
-        kv: 30
-        # stiffness: 10.0
-        # damping: 5.0
-        # armature: 0.0
-        # force_range: [-1000.0, 1000.0]
-        command: position
+    control: # the configs are just for reference, using these values directly will lead to suboptimal results
+      joint_commands_topic: joint_commands
+      joint_commands_topic_frequency: 50
+      joint_states_topic: joint_states
+      joint_states_topic_frequency: 50
+      joint_control_topic: joint_control
+      joint_control_topic_frequency: 50
+      joint_properties:
+        left_wheel_steering_joint:
+          kp: 30
+          kv: 30
+          stiffness: 10.0
+          damping: 5.0
+          armature: 0.0
+          force_range: [-1000.0, 1000.0]
+          command: position
+        rear_left_wheel_joint:
+          kp: 50
+          kv: 50
+          stiffness: 10.0
+          damping: 5.0
+          armature: 0.0
+          force_range: [-1000.0, 1000.0]
+          command: velocity
+        rear_right_wheel_joint:
+          kp: 50
+          kv: 50
+          stiffness: 10.0
+          damping: 50.0
+          armature: 0.0
+          force_range: [-1000.0, 1000.0]
+          command: velocity
+        right_wheel_steering_joint:
+          kp: 30
+          kv: 30
+          stiffness: 10.0
+          damping: 5.0
+          armature: 0.0
+          force_range: [-1000.0, 1000.0]
+          command: position
 
     morph:
       path: "/home/vybhav/Desktop/newest_genesis/ackerman.urdf"
@@ -402,87 +448,6 @@ robots:
     # Although multiple camera types can be specified for one section, it is recommneded to set one camera type per sensor
     # i.e. if you want RGB and Depth, create two sensors with same transform but different camera_types
     # ----------------------------
-    - name: front_cam
-      sensor_type: cam
-      link: lidar_link
-      # Transform: [[  0.00,   0.00,  -1.00,   0.00],
-      #             [ -1.00,   0.00,   0.00,   0.00],
-      #             [  0.00,   1.00,   0.00,   0.00],
-      #             [  0.00,   0.00,   0.00,   1.00]]
-      pos: [0,0,0]
-      euler: [90,0,-90]
-      topics: [rgb]
-      frequency: 15
-      QOS_history: keep_last
-      QOS_depth: 25
-      QOS_reliability: reliable
-      QOS_durability: volatile
-      frame_id: lidar_link
-      # camera_type one of : ["rgb", "depth", "segmentation", "normal"]
-      # normal camera causes issue, idk why
-      camera_types: [rgb]
-      model: pinhole
-      res: [640, 480]
-      vfov: 30
-      aperture: 2.8
-      focus_dist: null
-      GUI: false
-      spp: 256
-      # denoise: true
-      near: 0.05
-      far: 10.0
-      add_noise: false
-      noise_mean: 0.0
-      noise_std: 0.01
-
-    # - name: grid_lidar_1
-    #   sensor_type: grid_lidar
-    #   link: base_link
-    #   frame_id: base_link
-    #   topic: grid_lidar_topic
-    #   frequency: 30.0
-    #   near: 0.01
-    #   far: 10.0
-    #   pos_offset: [0.0, 0.0, 1.75]
-    #   euler_offset: [0.0, 0.0, 0.0]
-    #   resolution: 0.1
-    #   grid_size: [1, 1]
-    #   ray_direction_euler: [0, 0, -90]
-    #   draw_points: false
-    #   draw_point_radius: 0.02
-    #   ray_start_color: [0.5, 0.5, 1.0, 1.0]
-    #   ray_hit_color: [1.0, 0.5, 0.5, 1.0]
-    #   return_points_in_world_frame: false
-    #   noise_mean: 0.0
-    #   noise_std: 0.0
-    #   QOS_history: KEEP_LAST
-    #   QOS_depth: 10
-    #   QOS_reliability: RELIABLE
-    #   QOS_durability: VOLATILE
-
-    - name: lidar_1
-      sensor_type: 3d_lidar
-      link: lidar_link
-      frame_id: lidar_link
-      topic: lidar_topic
-      frequency: 10.0
-      near: 0.3
-      far: 100.0
-      pos_offset: [0.0, 0.0, 0.5]
-      euler_offset: [0.0, 0.0, 0.0]
-      fov: [360.0, 30.0]
-      n_points: [64, 128]
-      draw_points: true
-      draw_point_radius: 0.03
-      ray_start_color: [0.5, 0.5, 1.0, 1.0]
-      ray_hit_color: [1.0, 0.0, 0.0, 1.0]
-      return_points_in_world_frame: false
-      noise_mean: 0.01
-      noise_std: 0.02
-      QOS_history: KEEP_LAST
-      QOS_depth: 5
-      QOS_reliability: RELIABLE
-      QOS_durability: VOLATILE
 
 
 

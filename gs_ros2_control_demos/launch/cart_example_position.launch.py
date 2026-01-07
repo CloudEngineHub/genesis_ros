@@ -17,7 +17,12 @@ from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.actions import RegisterEventHandler
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution
+from launch.substitutions import (
+    Command,
+    FindExecutable,
+    LaunchConfiguration,
+    PathJoinSubstitution,
+)
 
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
@@ -25,49 +30,52 @@ from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
     # Launch Arguments
-    use_sim_time = LaunchConfiguration('use_sim_time', default=True)
-    namespace = LaunchConfiguration('namespace', default="robot")
+    use_sim_time = LaunchConfiguration("use_sim_time", default=True)
+    namespace = LaunchConfiguration("namespace", default="robot")
 
     # Get URDF via xacro
     robot_description_content = Command(
         [
-            PathJoinSubstitution([FindExecutable(name='xacro')]),
-            ' ',
+            PathJoinSubstitution([FindExecutable(name="xacro")]),
+            " ",
             PathJoinSubstitution(
-                [FindPackageShare('gs_ros2_control_demos'),
-                 'urdf', 'test_cart_position.xacro.urdf']
+                [
+                    FindPackageShare("gs_ros2_control_demos"),
+                    "urdf",
+                    "test_cart_position.xacro.urdf",
+                ]
             ),
         ]
     )
-    robot_description = {'robot_description': robot_description_content}
+    robot_description = {"robot_description": robot_description_content}
     robot_controllers = PathJoinSubstitution(
         [
-            FindPackageShare('gs_ros2_control_demos'),
-            'config',
-            'cart_controller_position.yaml',
+            FindPackageShare("gs_ros2_control_demos"),
+            "config",
+            "cart_controller_position.yaml",
         ]
     )
 
     node_robot_state_publisher = Node(
-        package='robot_state_publisher',
-        executable='robot_state_publisher',
-        output='screen',
-        parameters=[robot_description]
+        package="robot_state_publisher",
+        executable="robot_state_publisher",
+        output="screen",
+        parameters=[robot_description],
     )
 
     joint_state_broadcaster_spawner = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=['joint_state_broadcaster'],
+        package="controller_manager",
+        executable="spawner",
+        arguments=["joint_state_broadcaster"],
     )
     joint_trajectory_controller_spawner = Node(
-        package='controller_manager',
-        executable='spawner',
+        package="controller_manager",
+        executable="spawner",
         arguments=[
-            'joint_trajectory_controller',
-            '--param-file',
+            "joint_trajectory_controller",
+            "--param-file",
             robot_controllers,
-            ],
+        ],
     )
 
     ros2_control_node = Node(
@@ -75,29 +83,34 @@ def generate_launch_description():
         executable="ros2_control_node",
         parameters=[robot_controllers],
         remappings=[
-            ("/robot/controller_manager/robot_description", f"/robot/robot_description"),
+            (
+                "/robot/controller_manager/robot_description",
+                f"/robot/robot_description",
+            ),
         ],
         output="screen",
-        namespace=namespace
+        namespace=namespace,
     )
-        
-    return LaunchDescription([
-        joint_state_broadcaster_spawner,
-        RegisterEventHandler(
-            event_handler=OnProcessExit(
-                target_action=joint_state_broadcaster_spawner,
-                on_exit=[joint_trajectory_controller_spawner],
-            )
-        ),
-        node_robot_state_publisher,
-        ros2_control_node,
-        # Launch Arguments
-        DeclareLaunchArgument(
-            'use_sim_time',
-            default_value=use_sim_time,
-            description='If true, use simulated clock'),
-        DeclareLaunchArgument(
-            'namespace',
-            default_value=namespace,
-            description='Namespace to be used'),
-    ])
+
+    return LaunchDescription(
+        [
+            joint_state_broadcaster_spawner,
+            RegisterEventHandler(
+                event_handler=OnProcessExit(
+                    target_action=joint_state_broadcaster_spawner,
+                    on_exit=[joint_trajectory_controller_spawner],
+                )
+            ),
+            node_robot_state_publisher,
+            ros2_control_node,
+            # Launch Arguments
+            DeclareLaunchArgument(
+                "use_sim_time",
+                default_value=use_sim_time,
+                description="If true, use simulated clock",
+            ),
+            DeclareLaunchArgument(
+                "namespace", default_value=namespace, description="Namespace to be used"
+            ),
+        ]
+    )

@@ -1,0 +1,3 @@
+# Build the Genesis scene (locks entity additions)
+---
+simulation_interfaces/Result result
